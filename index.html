@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
+    <title>MEET.MANAGER | Lomba Renang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #e8f4f8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            position: relative;
+        }
+        #bgOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.85;
+            /* Background utama: simpan file gambar di folder img/ pada repo GitHub kamu
+               lalu ganti nama file di bawah ini. JANGAN pakai link Google Drive
+               (Drive memblokir hotlink gambar). Lihat TUTORIAL.md bagian "Ganti Background". */
+            background-color: #003554;
+            background-image: linear-gradient(180deg, rgba(0, 53, 84, 0.55) 0%, rgba(0, 119, 182, 0.25) 50%, rgba(0, 53, 84, 0.6) 100%), url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background 0.5s ease;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg, transparent, transparent 48%, rgba(255, 215, 0, 0.06) 48%, rgba(255, 215, 0, 0.06) 52%, transparent 52%, transparent 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 950px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(0, 119, 182, 0.3);
+            border-radius: 2.5rem;
+            padding: 1.8rem 1.8rem 2.2rem;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            color: #1a2a3a;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+        .upcoming-float-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 40px -10px rgba(0, 119, 182, 0.5);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 999;
+            text-decoration: none;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            letter-spacing: 0.3px;
+        }
+        .upcoming-float-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 15px 50px -10px rgba(0, 119, 182, 0.6);
+            background: linear-gradient(135deg, #023e8a, #0077b6);
+        }
+        .upcoming-float-btn i {
+            font-size: 1rem;
+        }
+        .upcoming-float-btn .badge-count {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.1rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 2px;
+        }
+        .upcoming-float-btn.back-btn {
+            background: linear-gradient(135deg, #e63946, #c62828);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .upcoming-float-btn.back-btn:hover {
+            background: linear-gradient(135deg, #c62828, #b71c1c);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 2rem;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #0077b6, #00b4d8, #0077b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo i {
+            background: none;
+            -webkit-text-fill-color: #0077b6;
+            font-size: 2.2rem;
+        }
+        .admin-btn {
+            background: rgba(0, 119, 182, 0.12);
+            border: 2px solid #0077b6;
+            color: #0077b6;
+            padding: 0.6rem 1.4rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+        }
+        .admin-btn:hover {
+            background: #0077b6;
+            color: white;
+            border-color: #0077b6;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 119, 182, 0.08);
+            padding: 5px;
+            border-radius: 3rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 119, 182, 0.15);
+            max-width: 300px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.8rem 1.5rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            cursor: default;
+            background: #0077b6;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 25px -8px rgba(0, 119, 182, 0.4);
+        }
+        .card-view {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 252, 0.9));
+            backdrop-filter: blur(14px);
+            border-radius: 2rem;
+            padding: 1.8rem;
+            border: 2px solid rgba(0, 119, 182, 0.15);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 8px 32px rgba(0, 119, 182, 0.08);
+        }
+        .event-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #023e8a;
+            margin-bottom: 0.3rem;
+            word-break: break-word;
+        }
+        .event-subtitle {
+            font-size: 1.1rem;
+            color: #0077b6;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .event-subtitle i {
+            color: #00b4d8;
+        }
+        .seri-badge {
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            color: white;
+            font-weight: 700;
+            padding: 0.4rem 1.4rem;
+            border-radius: 2rem;
+            display: inline-block;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
+        }
+        .seri-counter {
+            color: #4a6a7a;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 12px;
+        }
+        .viewer-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 119, 182, 0.08);
+            border: 1px solid rgba(0, 119, 182, 0.15);
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            color: #2a4a5a;
+            font-weight: 600;
+        }
+        .status-badge i {
+            color: #0077b6;
+        }
+        .status-badge.live i {
+            color: #e63946;
+            animation: pulse 1.2s infinite;
+        }
+        .status-badge.live {
+            background: rgba(230, 57, 70, 0.08);
+            border-color: rgba(230, 57, 70, 0.2);
+            color: #e63946;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+        .event-desc {
+            margin-top: 14px;
+            color: #2a4a5a;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 12px 16px;
+            background: rgba(0, 119, 182, 0.05);
+            border-radius: 1rem;
+            border-left: 4px solid #0077b6;
+        }
+        .event-desc i {
+            color: #0077b6;
+            margin-right: 8px;
+        }
+        .swimmers-section {
+            margin-top: 1rem;
+            background: rgba(0, 119, 182, 0.03);
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            border: 2px solid rgba(0, 119, 182, 0.08);
+        }
+        .swimmers-section h4 {
+            color: #023e8a;
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .swimmers-section h4 i {
+            color: #0077b6;
+        }
+        .scoreboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .scoreboard-table thead th {
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            color: white;
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 3px solid #023e8a;
+        }
+        .scoreboard-table thead th:first-child { border-radius: 0.8rem 0 0 0; width: 80px; }
+        .scoreboard-table thead th:last-child { border-radius: 0 0.8rem 0 0; }
+        .scoreboard-table tbody tr {
+            transition: 0.2s;
+            border-bottom: 1px solid rgba(0, 119, 182, 0.06);
+        }
+        .scoreboard-table tbody tr:hover { background: rgba(0, 119, 182, 0.04); }
+        .scoreboard-table tbody tr:last-child { border-bottom: none; }
+        .scoreboard-table tbody td {
+            padding: 0.5rem 0.8rem;
+            vertical-align: middle;
+        }
+        .scoreboard-table .lane-cell {
+            font-weight: 800;
+            color: #0077b6;
+            font-size: 0.9rem;
+        }
+        .scoreboard-table .name-cell {
+            font-weight: 600;
+            color: #023e8a;
+        }
+        .scoreboard-table .club-cell {
+            color: #4a6a7a;
+        }
+        .scoreboard-table .empty-row td {
+            color: #b0b8c0;
+            font-style: italic;
+        }
+        .scoreboard-table .empty-row .lane-cell { color: #b0b8c0; }
+        .no-swimmers {
+            color: #4a6a7a;
+            font-size: 0.9rem;
+            padding: 0.8rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 1rem;
+        }
+        .global-link-btn {
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            border: none;
+            color: white;
+            padding: 0.9rem 1.5rem;
+            border-radius: 2.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin: 0.5rem 0 0.5rem;
+            transition: 0.3s;
+            text-align: center;
+            font-size: 1rem;
+            box-shadow: 0 8px 25px -8px rgba(0, 119, 182, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .global-link-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px -8px rgba(0, 119, 182, 0.5);
+            background: linear-gradient(135deg, #023e8a, #0077b6);
+        }
+        .upcoming-panel {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .upcoming-panel.active { display: block; }
+        @keyframes fadeSlideIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .events-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        .event-card {
+            border-radius: 1.8rem;
+            padding: 1.8rem;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: white;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        .event-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.75) 15%, rgba(0, 0, 0, 0.1) 70%);
+            z-index: 1;
+        }
+        .event-card-content {
+            position: relative;
+            z-index: 2;
+        }
+        .event-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 4px;
+        }
+        .event-card .event-date {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .event-card .event-desc-upcoming {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        .admin-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 2rem;
+            padding: 1.8rem;
+            border: 2px solid #0077b6;
+            margin-top: 0.5rem;
+            width: 100%;
+            box-shadow: 0 8px 40px rgba(0, 119, 182, 0.1);
+        }
+        .admin-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .admin-sidebar {
+            flex: 1 1 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .admin-content {
+            flex: 3 1 500px;
+            background: rgba(0, 119, 182, 0.04);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 119, 182, 0.1);
+        }
+        .admin-content h3, .admin-content h4 {
+            color: #023e8a;
+        }
+        .menu-btn {
+            background: rgba(0, 119, 182, 0.06);
+            border: 2px solid rgba(0, 119, 182, 0.15);
+            color: #1a3a4a;
+            padding: 0.8rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            text-align: left;
+            transition: 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .menu-btn:hover, .menu-btn.active {
+            background: #0077b6;
+            color: white;
+            border-color: #0077b6;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0 0.8rem;
+            border-radius: 1rem;
+            background: white;
+            border: 2px solid rgba(0, 119, 182, 0.2);
+            color: #1a2a3a;
+            font-family: inherit;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #0077b6;
+            box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1);
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            background: #0077b6;
+            color: white;
+            font-weight: 700;
+            padding: 0.7rem 1.6rem;
+            border-radius: 2rem;
+            margin-top: 0.3rem;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #023e8a;
+            transform: translateY(-1px);
+        }
+        button.secondary {
+            background: #e0e8ec;
+            color: #1a2a3a;
+        }
+        button.danger {
+            background: #e63946;
+        }
+        button.danger:hover {
+            background: #c62828;
+        }
+        .hidden { display: none !important; }
+        .admin-nav-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .admin-nav-controls .nav-btn {
+            flex: 1;
+            min-width: 80px;
+            background: rgba(0, 119, 182, 0.06);
+            border: 2px solid rgba(0, 119, 182, 0.2);
+            color: #023e8a;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .admin-nav-controls .nav-btn:hover:not(:disabled) {
+            background: #0077b6;
+            color: white;
+            border-color: #0077b6;
+        }
+        .admin-nav-controls .nav-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            border-color: #ccc;
+            background: rgba(0, 0, 0, 0.04);
+        }
+        .upcoming-item {
+            border: 2px solid rgba(0, 119, 182, 0.15);
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 12px;
+            background: white;
+        }
+        .upcoming-item input {
+            margin: 0.3rem 0 0.5rem;
+        }
+        .upcoming-item .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .upcoming-item .btn-group button {
+            margin-top: 0;
+            flex: 1;
+        }
+        #loginModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        #loginModal>div {
+            background: white;
+            padding: 2rem;
+            border-radius: 2rem;
+            border: 2px solid #0077b6;
+            width: 90%;
+            max-width: 340px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        #loginModal h3 {
+            color: #023e8a;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        #loginModal input {
+            border-color: #0077b6;
+        }
+        #loginModal button {
+            flex: 1;
+        }
+        #loginError {
+            color: #e63946;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        .water-decoration {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: repeating-linear-gradient(90deg, rgba(0, 119, 182, 0.05) 0%, rgba(0, 180, 216, 0.08) 25%, rgba(0, 119, 182, 0.05) 50%, rgba(0, 180, 216, 0.08) 75%, rgba(0, 119, 182, 0.05) 100%);
+            z-index: -1;
+            pointer-events: none;
+            animation: waveMove 8s linear infinite;
+        }
+        @keyframes waveMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 200px 0; }
+        }
+        .csv-format-hint {
+            background: rgba(0, 119, 182, 0.05);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin: 0.5rem 0 1rem;
+            font-size: 0.85rem;
+            color: #2a4a5a;
+        }
+        .csv-format-hint code {
+            background: #e8ecf0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+            font-size: 0.8rem;
+        }
+        .real-time-clock {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: #023e8a;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 119, 182, 0.1);
+        }
+        .real-time-clock i {
+            color: #0077b6;
+        }
+        @media (max-width: 650px) {
+            .app-container { padding: 1.2rem; border-radius: 2rem; }
+            .event-title { font-size: 1.5rem; }
+            .event-subtitle { font-size: 0.95rem; }
+            .admin-grid { flex-direction: column; }
+            .admin-sidebar { flex-direction: row; flex-wrap: wrap; }
+            .menu-btn { flex: 1 1 auto; font-size: 0.8rem; padding: 0.6rem; }
+            .admin-nav-controls .nav-btn { font-size: 0.75rem; padding: 0.5rem 0.8rem; min-width: 60px; }
+            .viewer-status { gap: 8px; }
+            .status-badge { font-size: 0.7rem; padding: 0.2rem 0.8rem; }
+            .upcoming-item .btn-group { flex-direction: column; }
+            .tabs { max-width: 100%; }
+            .tab { padding: 0.6rem 1rem; font-size: 0.8rem; }
+            .scoreboard-table { font-size: 0.75rem; }
+            .scoreboard-table thead th { padding: 0.4rem 0.5rem; font-size: 0.65rem; }
+            .scoreboard-table tbody td { padding: 0.35rem 0.5rem; }
+            .scoreboard-table .lane-cell { font-size: 0.75rem; }
+            .upcoming-float-btn { top: 10px; right: 10px; padding: 0.5rem 1rem; font-size: 0.75rem; gap: 6px; border-width: 1.5px; }
+            .upcoming-float-btn .btn-text { display: none; }
+            .upcoming-float-btn .badge-count { display: none; }
+            .real-time-clock { font-size: 0.75rem; padding: 0.2rem 0.6rem; }
+        }
+        @media (min-width: 651px) and (max-width: 1024px) {
+            .upcoming-float-btn { top: 20px; right: 20px; padding: 0.7rem 1.4rem; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bgOverlay"></div>
+    <div class="water-decoration"></div>
+
+    <button class="upcoming-float-btn" id="upcomingFloatBtn" onclick="toggleUpcoming()">
+        <i class="fas fa-calendar-alt"></i>
+        <span class="btn-text" id="floatBtnText">Event Selanjutnya</span>
+        <span class="badge-count" id="upcomingBadge">0</span>
+        <i class="fas fa-chevron-right" id="floatBtnIcon" style="font-size:0.7rem;"></i>
+    </button>
+
+    <div class="app-container" id="appContainer">
+
+        <div class="header">
+            <div class="logo"><i class="fas fa-swimmer"></i> MEET.MANAGER</div>
+            <div style="display: flex; gap: 8px;">
+                <span id="adminStatusIndicator" class="admin-btn" onclick="toggleAdminModal()"><i class="fas fa-user-shield"></i> Admin</span>
+                <button id="logoutAdminBtn" class="admin-btn hidden" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div class="tabs"><div class="tab">🏊 Acara Berlangsung</div></div>
+
+        <div id="currentEventPanel">
+            <div class="card-view">
+                <div id="eventNameDisplay" class="event-subtitle">
+                    <i class="fas fa-trophy"></i>
+                    <span id="eventNameText">Memuat...</span>
+                    <span class="status-badge live"><i class="fas fa-circle"></i> LIVE</span>
+                </div>
+                <div id="eventDisplay" class="event-title">Belum ada acara</div>
+                <div class="viewer-status">
+                    <span id="seriDisplay" class="seri-badge"></span>
+                    <span id="seriCounter" class="seri-counter"></span>
+                    <span class="status-badge"><i class="fas fa-clock"></i><span id="eventTimeDisplay">-</span></span>
+                    <span class="real-time-clock" id="realTimeClock"><i class="fas fa-clock"></i><span id="clockDisplay">00:00:00</span></span>
+                </div>
+                <div class="event-desc" id="eventDesc"><i class="fas fa-flag-checkered"></i> Tambahkan data acara lewat menu Admin &gt; Upload CSV</div>
+                <div id="quickNavBar" class="admin-nav-controls hidden">
+                    <button class="nav-btn" id="qNavPrevAcara" onclick="adminPrevAcara()"><i class="fas fa-step-backward"></i> Acara</button>
+                    <button class="nav-btn" id="qNavPrevSeri" onclick="adminPrevSeri()"><i class="fas fa-chevron-left"></i> Seri</button>
+                    <button class="nav-btn" id="qNavNextSeri" onclick="adminNextSeri()">Seri <i class="fas fa-chevron-right"></i></button>
+                    <button class="nav-btn" id="qNavNextAcara" onclick="adminNextAcara()">Acara <i class="fas fa-step-forward"></i></button>
+                </div>
+            </div>
+
+            <div class="swimmers-section" id="swimmersSection">
+                <h4><i class="fas fa-table"></i> STARTING LIST</h4>
+                <div id="swimmersContainer"><div class="no-swimmers">Belum ada data perenang untuk acara ini</div></div>
+            </div>
+
+            <button id="globalInfoBtn" class="global-link-btn"><i class="fas fa-file-pdf"></i> 📄 INFORMASI HASIL LOMBA</button>
+        </div>
+
+        <div class="upcoming-panel" id="upcomingPanel">
+            <div class="events-grid" id="upcomingEventsContainer"></div>
+        </div>
+
+        <div id="adminPanelContainer" class="admin-panel hidden">
+            <div class="admin-grid">
+                <div class="admin-sidebar" id="adminSidebar">
+                    <button class="menu-btn active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                    <button class="menu-btn" data-section="upload"><i class="fas fa-upload"></i> Upload CSV</button>
+                    <button class="menu-btn" data-section="link"><i class="fas fa-link"></i> Link Hasil</button>
+                    <button class="menu-btn" data-section="upcoming"><i class="fas fa-calendar-plus"></i> Event Selanjutnya</button>
+                    <button class="menu-btn" data-section="navigation"><i class="fas fa-arrows-alt-h"></i> Navigasi</button>
+                    <button class="menu-btn" data-section="eventname"><i class="fas fa-tag"></i> Nama Event</button>
+                    <button class="menu-btn" data-section="reset"><i class="fas fa-trash-alt"></i> Reset Data</button>
+                </div>
+                <div class="admin-content" id="adminContentArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginModal">
+        <div>
+            <h3><i class="fas fa-user-shield" style="color:#0077b6;"></i> Admin Login</h3>
+            <p style="color:#4a6a7a; margin-bottom:12px;">Masukkan password untuk mengakses panel admin</p>
+            <input id="passwordInput" type="password" placeholder="Password" style="margin:0.5rem 0;">
+            <div style="display:flex; gap:10px;">
+                <button onclick="login()" style="flex:1;">Masuk</button>
+                <button onclick="closeModal()" style="flex:1; background:#e0e8ec; color:#1a2a3a;">Batal</button>
+            </div>
+            <div id="loginError"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- DEFAULT DATA ----------
+            // Sengaja dikosongkan: aplikasi dimulai tanpa data contoh.
+            // Isi data acara lewat menu Admin > Upload CSV.
+            const DEFAULT_EVENTS = [];
+            const DEFAULT_UPCOMING = [];
+
+            // ---------- STATE ----------
+            let events = [];
+            let currentEventIndex = 0;
+            let currentSeriIndex = 0;
+            let upcomingEvents = [];
+            let swimmersData = [];
+            let globalDriveLink = '';
+            let eventName = 'Nama Kejuaraan Anda';
+            let isAdmin = false;
+            let isUpcomingVisible = false;
+            const ADMIN_PASSWORD = 'admin123';
+
+            // DOM refs
+            const bgOverlay = document.getElementById('bgOverlay');
+            const eventDisplay = document.getElementById('eventDisplay');
+            const eventNameText = document.getElementById('eventNameText');
+            const seriDisplay = document.getElementById('seriDisplay');
+            const seriCounter = document.getElementById('seriCounter');
+            const eventDesc = document.getElementById('eventDesc');
+            const eventTimeDisplay = document.getElementById('eventTimeDisplay');
+            const upcomingPanel = document.getElementById('upcomingPanel');
+            const floatBtn = document.getElementById('upcomingFloatBtn');
+            const floatBtnText = document.getElementById('floatBtnText');
+            const floatBtnIcon = document.getElementById('floatBtnIcon');
+            const upcomingBadge = document.getElementById('upcomingBadge');
+            const swimmersContainer = document.getElementById('swimmersContainer');
+            const clockDisplay = document.getElementById('clockDisplay');
+
+            // ---------- CLOCK ----------
+            function updateClock() {
+                const now = new Date();
+                clockDisplay.textContent = now.toTimeString().slice(0,8);
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // ---------- STORAGE ----------
+            function loadFromStorage() {
+                const storedEvents = localStorage.getItem('meet_events');
+                events = storedEvents ? JSON.parse(storedEvents) : JSON.parse(JSON.stringify(DEFAULT_EVENTS));
+                const storedUpcoming = localStorage.getItem('meet_upcoming');
+                upcomingEvents = storedUpcoming ? JSON.parse(storedUpcoming) : JSON.parse(JSON.stringify(DEFAULT_UPCOMING));
+                const storedSwimmers = localStorage.getItem('meet_swimmers');
+                swimmersData = storedSwimmers ? JSON.parse(storedSwimmers) : [];
+                globalDriveLink = localStorage.getItem('meet_driveLink') || '';
+                eventName = localStorage.getItem('meet_eventName') || 'Nama Kejuaraan Anda';
+                const storedEventIdx = localStorage.getItem('meet_currentEventIndex');
+                const storedSeriIdx = localStorage.getItem('meet_currentSeriIndex');
+                currentEventIndex = storedEventIdx !== null ? parseInt(storedEventIdx, 10) : 0;
+                currentSeriIndex = storedSeriIdx !== null ? parseInt(storedSeriIdx, 10) : 0;
+
+                if (!events || !events.length) events = JSON.parse(JSON.stringify(DEFAULT_EVENTS));
+                if (!upcomingEvents) upcomingEvents = JSON.parse(JSON.stringify(DEFAULT_UPCOMING));
+                if (currentEventIndex >= events.length) currentEventIndex = events.length - 1;
+                if (currentEventIndex < 0) currentEventIndex = 0;
+                if (events.length) {
+                    const seriLength = events[currentEventIndex].seri.length;
+                    if (currentSeriIndex >= seriLength) currentSeriIndex = seriLength - 1;
+                    if (currentSeriIndex < 0) currentSeriIndex = 0;
+                } else { currentSeriIndex = 0; }
+                updateBadge();
+                // background fixed (file lokal di folder img/, lihat TUTORIAL.md)
+                bgOverlay.style.backgroundImage = `linear-gradient(180deg, rgba(0, 53, 84, 0.55) 0%, rgba(0, 119, 182, 0.25) 50%, rgba(0, 53, 84, 0.6) 100%), url('img/bg.jpg')`;
+                bgOverlay.style.backgroundSize = 'cover';
+                bgOverlay.style.backgroundPosition = 'center';
+            }
+            function saveAll() {
+                localStorage.setItem('meet_events', JSON.stringify(events));
+                localStorage.setItem('meet_upcoming', JSON.stringify(upcomingEvents));
+                localStorage.setItem('meet_swimmers', JSON.stringify(swimmersData));
+                localStorage.setItem('meet_driveLink', globalDriveLink);
+                localStorage.setItem('meet_eventName', eventName);
+                localStorage.setItem('meet_currentEventIndex', String(currentEventIndex));
+                localStorage.setItem('meet_currentSeriIndex', String(currentSeriIndex));
+                updateBadge();
+            }
+            function updateBadge() {
+                if (upcomingBadge) upcomingBadge.textContent = upcomingEvents.length;
+            }
+
+            // ---------- RENDER SWIMMERS ----------
+            function renderSwimmers() {
+                if (!events.length) {
+                    swimmersContainer.innerHTML = '<div class="no-swimmers">Tidak ada acara</div>';
+                    return;
+                }
+                const currentEvent = events[currentEventIndex];
+                const eventId = currentEvent.id;
+                const seriIdx = currentSeriIndex;
+                const swimmerData = swimmersData.find(s => s.acaraId === eventId && s.seriIndex === seriIdx);
+                if (!swimmerData || !swimmerData.swimmers || swimmerData.swimmers.length === 0) {
+                    swimmersContainer.innerHTML = '<div class="no-swimmers">Belum ada data perenang untuk acara ini</div>';
+                    return;
+                }
+                const sorted = [...swimmerData.swimmers].sort((a, b) => a.lane - b.lane);
+                const maxLane = Math.min(Math.max(...sorted.map(s => s.lane), 0), 15);
+                let html = `
+                    <table class="scoreboard-table">
+                        <thead><tr><th>LANE</th><th>NAME</th><th>TEAM</th></tr></thead>
+                        <tbody>
+                `;
+                for (let i = 1; i <= maxLane; i++) {
+                    const swimmer = sorted.find(s => s.lane === i);
+                    if (swimmer) {
+                        html += `<tr><td class="lane-cell">${i}</td><td class="name-cell">${swimmer.name}</td><td class="club-cell">${swimmer.club || '-'}</td></tr>`;
+                    } else {
+                        html += `<tr class="empty-row"><td class="lane-cell">${i}</td><td>-</td><td>-</td></tr>`;
+                    }
+                }
+                html += `</tbody></table>`;
+                swimmersContainer.innerHTML = html;
+            }
+
+            // ---------- RENDER UI ----------
+            function renderCurrentEvent() {
+                eventNameText.innerText = eventName || 'Kejuaraan Renang';
+                if (!events.length) {
+                    eventDisplay.innerText = 'Tidak ada acara';
+                    seriDisplay.innerText = '';
+                    seriCounter.innerText = '';
+                    eventDesc.innerHTML = '';
+                    eventTimeDisplay.innerText = '-';
+                    swimmersContainer.innerHTML = '<div class="no-swimmers">Tidak ada acara</div>';
+                    return;
+                }
+                const ev = events[currentEventIndex];
+                eventDisplay.innerText = ev.nama;
+                seriDisplay.innerText = ev.seri[currentSeriIndex] || 'SERI 01';
+                seriCounter.innerText = `${currentSeriIndex + 1} / ${ev.seri.length}`;
+                eventDesc.innerHTML = `<i class="fas fa-flag-checkered"></i> ${ev.deskripsi || ''}`;
+                eventTimeDisplay.innerText = 'Sedang Berlangsung';
+                renderSwimmers();
+                updateAdminNavControls();
+                updateQuickNavBar();
+            }
+
+            function updateQuickNavBar() {
+                const prevAcara = document.getElementById('qNavPrevAcara');
+                const nextAcara = document.getElementById('qNavNextAcara');
+                const prevSeri = document.getElementById('qNavPrevSeri');
+                const nextSeri = document.getElementById('qNavNextSeri');
+                if (!prevAcara || !events.length) return;
+                const ev = events[currentEventIndex];
+                prevAcara.disabled = currentEventIndex === 0;
+                nextAcara.disabled = currentEventIndex === events.length - 1;
+                prevSeri.disabled = currentSeriIndex === 0;
+                nextSeri.disabled = currentSeriIndex === (ev.seri.length - 1);
+            }
+
+            function updateAdminNavControls() {
+                const container = document.getElementById('adminNavControls');
+                if (!container) return;
+                if (!events.length) {
+                    container.innerHTML = '<p style="color:#999;">Tidak ada acara</p>';
+                    return;
+                }
+                const ev = events[currentEventIndex];
+                const totalSeri = ev?.seri.length || 0;
+                container.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:14px; width:100%;">
+                        <div>
+                            <p style="color:#023e8a; font-weight:700; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Acara (Lomba)</p>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button class="nav-btn" onclick="adminPrevAcara()" ${currentEventIndex === 0 ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-left"></i> Acara Sebelumnya
+                                </button>
+                                <button class="nav-btn" onclick="adminNextAcara()" ${currentEventIndex === events.length - 1 ? 'disabled' : ''}>
+                                    Acara Selanjutnya <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <p style="color:#023e8a; font-weight:700; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Seri (Heat)</p>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button class="nav-btn" onclick="adminPrevSeri()" ${currentSeriIndex === 0 ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-left"></i> Prev Seri
+                                </button>
+                                <button class="nav-btn" onclick="adminNextSeri()" ${currentSeriIndex === totalSeri - 1 ? 'disabled' : ''}>
+                                    Next Seri <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div style="color:#2a4a5a; font-size:0.85rem; margin-top:4px; background:rgba(0,119,182,0.05); padding:8px 12px; border-radius:1rem;">
+                            Acara <strong>${currentEventIndex + 1} / ${events.length}</strong> —
+                            <span style="color:#023e8a; font-weight:700;">${ev.nama}</span> —
+                            <span style="color:#0077b6; font-weight:600;">${ev.seri[currentSeriIndex] || 'SERI 01'}</span>
+                            (${currentSeriIndex + 1} / ${totalSeri})
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ---------- TOGGLE UPCOMING ----------
+            window.toggleUpcoming = function() {
+                isUpcomingVisible = !isUpcomingVisible;
+                if (isUpcomingVisible) {
+                    upcomingPanel.classList.add('active');
+                    renderUpcomingViewer();
+                    floatBtn.classList.add('back-btn');
+                    floatBtnText.textContent = 'Kembali';
+                    floatBtnIcon.className = 'fas fa-arrow-left';
+                    floatBtnIcon.style.fontSize = '0.7rem';
+                    document.getElementById('currentEventPanel').style.display = 'none';
+                    document.querySelector('.tabs').style.display = 'none';
+                } else {
+                    upcomingPanel.classList.remove('active');
+                    floatBtn.classList.remove('back-btn');
+                    floatBtnText.textContent = 'Event Selanjutnya';
+                    floatBtnIcon.className = 'fas fa-chevron-right';
+                    floatBtnIcon.style.fontSize = '0.7rem';
+                    document.getElementById('currentEventPanel').style.display = 'block';
+                    document.querySelector('.tabs').style.display = 'flex';
+                }
+            };
+
+            function renderUpcomingViewer() {
+                const container = document.getElementById('upcomingEventsContainer');
+                if (!upcomingEvents.length) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:2rem; color:#4a6a7a; background:rgba(0,119,182,0.04); border-radius:1.5rem; border:2px dashed rgba(0,119,182,0.15);">
+                            <i class="fas fa-calendar-alt" style="font-size:2rem; color:#0077b6; opacity:0.5;"></i>
+                            <p style="margin-top:8px;">Belum ada event selanjutnya</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = upcomingEvents.map(ev => `
+                    <div class="event-card" style="background-image: url('${ev.bg || 'img/bg.jpg'}');">
+                        <div class="event-card-content">
+                            <h3>${ev.nama}</h3>
+                            <p class="event-date"><i class="far fa-calendar-alt"></i> ${ev.tanggal}</p>
+                            <p class="event-desc-upcoming">${ev.deskripsi || ''}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderUpcomingAdminForm() {
+                const container = document.getElementById('upcomingAdminFormContainer');
+                if (!container) return;
+                if (!upcomingEvents.length) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:1rem; color:#4a6a7a; background:rgba(0,119,182,0.04); border-radius:1rem; border:2px dashed rgba(0,119,182,0.15); margin-bottom:12px;">
+                            <p>Belum ada event selanjutnya</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = upcomingEvents.map((ev, idx) => `
+                    <div class="upcoming-item">
+                        <input value="${ev.nama}" placeholder="Nama Event" onchange="updateUpcoming(${idx},'nama',this.value)">
+                        <input value="${ev.tanggal}" placeholder="Tanggal (contoh: 15-17 Agustus 2026)" onchange="updateUpcoming(${idx},'tanggal',this.value)">
+                        <input value="${ev.deskripsi}" placeholder="Deskripsi" onchange="updateUpcoming(${idx},'deskripsi',this.value)">
+                        <input value="${ev.bg}" placeholder="URL Background" onchange="updateUpcoming(${idx},'bg',this.value)">
+                        <div class="btn-group">
+                            <button onclick="deleteUpcoming(${idx})" class="danger">Hapus</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // ---------- NAVIGASI ----------
+            window.adminNextSeri = function() {
+                if (!events.length || !isAdmin) return;
+                const ev = events[currentEventIndex];
+                if (currentSeriIndex < ev.seri.length - 1) {
+                    currentSeriIndex++;
+                    saveAll();
+                    renderCurrentEvent();
+                    setTimeout(updateAdminNavControls, 50);
+                }
+            };
+            window.adminPrevSeri = function() {
+                if (!events.length || !isAdmin) return;
+                if (currentSeriIndex > 0) {
+                    currentSeriIndex--;
+                    saveAll();
+                    renderCurrentEvent();
+                    setTimeout(updateAdminNavControls, 50);
+                }
+            };
+            window.adminNextAcara = function() {
+                if (!events.length || !isAdmin) return;
+                if (currentEventIndex < events.length - 1) {
+                    currentEventIndex++;
+                    currentSeriIndex = 0;
+                    saveAll();
+                    renderCurrentEvent();
+                    setTimeout(updateAdminNavControls, 50);
+                }
+            };
+            window.adminPrevAcara = function() {
+                if (!events.length || !isAdmin) return;
+                if (currentEventIndex > 0) {
+                    currentEventIndex--;
+                    currentSeriIndex = 0;
+                    saveAll();
+                    renderCurrentEvent();
+                    setTimeout(updateAdminNavControls, 50);
+                }
+            };
+
+            // ---------- ADMIN UI ----------
+            function renderAdminSection(section) {
+                const content = document.getElementById('adminContentArea');
+                let html = '';
+                switch (section) {
+                    case 'dashboard':
+                        html = `
+                            <h3><i class="fas fa-chart-pie" style="color:#0077b6;"></i> Dashboard</h3>
+                            <p>Total Acara: <strong>${events.length}</strong> | Event Mendatang: <strong>${upcomingEvents.length}</strong></p>
+                            <p style="margin-top:10px;">Acara saat ini: <strong style="color:#023e8a;">${events[currentEventIndex]?.nama || '-'}</strong></p>
+                            <p>Seri: <strong style="color:#0077b6;">${events[currentEventIndex]?.seri[currentSeriIndex] || '-'}</strong></p>
+                            <p style="margin-top:8px;font-size:0.85rem;color:#4a6a7a;">Status: ${isAdmin ? '✅ Admin aktif' : '❌ Belum login'}</p>
+                            <p style="margin-top:8px;font-size:0.85rem;color:#4a6a7a;">Total Seri: <strong>${events[currentEventIndex]?.seri?.length || 0}</strong></p>
+                        `;
+                        break;
+                    case 'upload':
+                        html = `
+                            <h4><i class="fas fa-upload" style="color:#0077b6;"></i> Upload CSV</h4>
+                            <div class="csv-format-hint">
+                                <strong>Format CSV (dipisah koma) — satu baris = satu SERI/HEAT:</strong><br>
+                                <code>Nama Acara, Deskripsi, Nama Seri, Lane1:Nama1:Klub1|Lane2:Nama2:Klub2</code><br><br>
+                                <strong>Contoh (1 acara, 2 seri dengan perenang berbeda):</strong><br>
+                                <code>ACARA 101, 50M GAYA BEBAS KU ABCD PUTRA, SERI 01, 1:Eka Jaya:Aquatik Bandung|2:Juniar:AKSC Jakarta</code><br>
+                                <code>ACARA 101, 50M GAYA BEBAS KU ABCD PUTRA, SERI 02, 1:Budi:Tirta Renang|2:Sari:Aquatik Bandung</code><br>
+                                <code>ACARA 102, 100M GAYA DADA PUTRI, SERI 01, 1:Maya:Renang Jaya|2:Dewi:AKSC Jakarta</code><br><br>
+                                Baris dengan <strong>Nama Acara</strong> yang sama otomatis digabung jadi satu acara dengan beberapa seri.
+                                Kolom Deskripsi cukup diisi sekali saja (boleh dikosongkan di baris berikutnya).
+                                <strong>Lintasan maksimal 15</strong>, lintasan kosong otomatis tampil sebagai "-".
+                                Baris pertama yang berisi tulisan "Nama Acara" akan dianggap header dan dilewati otomatis.
+                            </div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+                                <input type="file" id="csvFileInput" accept=".csv" style="flex:2 1 200px;">
+                                <button onclick="processCSV()" style="flex:1 1 120px;">Proses CSV</button>
+                            </div>
+                            <button class="secondary" onclick="downloadCSVTemplate()" style="width:100%;"><i class="fas fa-download"></i> Download Template CSV</button>
+                        `;
+                        break;
+                    case 'link':
+                        html = `
+                            <h4><i class="fas fa-link" style="color:#0077b6;"></i> Link Hasil Lomba</h4>
+                            <input id="linkInput" value="${globalDriveLink}" placeholder="URL link">
+                            <button onclick="updateLink()">Simpan</button>
+                        `;
+                        break;
+                    case 'upcoming':
+                        html = `
+                            <h4><i class="fas fa-calendar-plus" style="color:#0077b6;"></i> Kelola Event Selanjutnya</h4>
+                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:12px;">Tambahkan, edit, atau hapus event yang akan datang.</p>
+                            <div id="upcomingAdminFormContainer"></div>
+                            <button onclick="addNewUpcoming()" style="width:100%;">+ Tambah Event Baru</button>
+                        `;
+                        setTimeout(renderUpcomingAdminForm, 20);
+                        break;
+                    case 'navigation':
+                        html = `
+                            <h4><i class="fas fa-arrows-alt-h" style="color:#0077b6;"></i> Kontrol Navigasi</h4>
+                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:12px;">Gunakan tombol di bawah untuk pindah ke acara/seri lain. Tombol navigasi cepat juga muncul langsung di kartu utama viewer saat kamu login sebagai admin.</p>
+                            <div id="adminNavControls"></div>
+                        `;
+                        setTimeout(updateAdminNavControls, 20);
+                        break;
+                    case 'eventname':
+                        html = `
+                            <h4><i class="fas fa-tag" style="color:#0077b6;"></i> Nama Event</h4>
+                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:8px;">Ubah nama event yang ditampilkan di viewer.</p>
+                            <input id="eventNameInput" value="${eventName}" placeholder="Nama Event" style="margin-bottom:8px;">
+                            <button onclick="updateEventName()">Simpan Nama Event</button>
+                            <div style="margin-top:12px; padding:12px 16px; background:rgba(0,119,182,0.06); border-radius:1rem; border:2px solid rgba(0,119,182,0.1);">
+                                <p style="color:#4a6a7a; font-size:0.8rem;">Preview:</p>
+                                <p style="color:#023e8a; font-weight:700; font-size:1.1rem;">🏊 ${eventName || 'Kejuaraan Renang'}</p>
+                            </div>
+                        `;
+                        break;
+                    case 'reset':
+                        html = `
+                            <h4><i class="fas fa-trash-alt" style="color:#e63946;"></i> Reset Data</h4>
+                            <p style="color:#e63946; font-size:0.9rem; margin-bottom:12px;">⚠️ Peringatan: Tindakan ini akan menghapus semua data yang tersimpan!</p>
+                            <button onclick="resetAllData()" style="background:#e63946; width:100%;">Reset Semua Data</button>
+                        `;
+                        break;
+                }
+                content.innerHTML = html;
+                document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+                const activeBtn = document.querySelector(`.menu-btn[data-section="${section}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+            }
+
+            // ---------- RESET DATA ----------
+            window.resetAllData = function() {
+                if (confirm('Yakin ingin mereset semua data? Semua acara dan data perenang akan hilang!')) {
+                    localStorage.removeItem('meet_events');
+                    localStorage.removeItem('meet_upcoming');
+                    localStorage.removeItem('meet_swimmers');
+                    localStorage.removeItem('meet_driveLink');
+                    localStorage.removeItem('meet_eventName');
+                    localStorage.removeItem('meet_currentEventIndex');
+                    localStorage.removeItem('meet_currentSeriIndex');
+                    events = JSON.parse(JSON.stringify(DEFAULT_EVENTS));
+                    upcomingEvents = JSON.parse(JSON.stringify(DEFAULT_UPCOMING));
+                    swimmersData = [];
+                    currentEventIndex = 0;
+                    currentSeriIndex = 0;
+                    saveAll();
+                    renderCurrentEvent();
+                    renderAdminSection('dashboard');
+                    alert('Data berhasil direset!');
+                }
+            };
+
+            // ---------- PROCESS CSV ----------
+            // Format baru: satu baris = satu SERI/HEAT.
+            // Nama Acara, Deskripsi, Nama Seri, Lane:Nama:Klub|Lane:Nama:Klub|...
+            // Baris dengan Nama Acara yang sama digabung jadi satu acara dengan beberapa seri.
+            window.processCSV = function() {
+                const file = document.getElementById('csvFileInput')?.files[0];
+                if (!file) return alert('Pilih file CSV');
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const lines = e.target.result.split('\n').filter(l => l.trim());
+                    const newEvents = [];
+                    const eventMap = {};
+                    const newSwimmers = [];
+                    let importedSeriCount = 0;
+
+                    lines.forEach((line, idx) => {
+                        const parts = line.split(',').map(p => p.trim());
+                        if (parts.length < 3) return;
+                        // lewati baris header, contoh: "Nama Acara, Deskripsi, ..."
+                        if (idx === 0 && /^nama\s*acara$/i.test(parts[0])) return;
+
+                        const eventNama = parts[0];
+                        const deskripsi = parts[1] || '';
+                        const seriNama = parts[2] || `SERI ${String(importedSeriCount + 1).padStart(2, '0')}`;
+                        const swimmersRaw = parts[3] || '';
+                        if (!eventNama) return;
+
+                        if (!eventMap[eventNama]) {
+                            const eventId = Date.now() + Math.random().toString(36).substr(2, 5);
+                            eventMap[eventNama] = { id: eventId, nama: eventNama, deskripsi: deskripsi, seri: [] };
+                            newEvents.push(eventMap[eventNama]);
+                        }
+                        const ev = eventMap[eventNama];
+                        if (deskripsi && !ev.deskripsi) ev.deskripsi = deskripsi;
+
+                        let seriIdx = ev.seri.indexOf(seriNama);
+                        if (seriIdx === -1) {
+                            ev.seri.push(seriNama);
+                            seriIdx = ev.seri.length - 1;
+                        }
+                        importedSeriCount++;
+
+                        if (swimmersRaw) {
+                            const lanes = swimmersRaw.split('|').map(l => l.trim()).filter(l => l);
+                            const swimmers = [];
+                            lanes.forEach(laneData => {
+                                const [lane, name, club] = laneData.split(':').map(p => p.trim());
+                                if (lane && name) {
+                                    swimmers.push({ lane: parseInt(lane), name: name, club: club || '' });
+                                }
+                            });
+                            swimmers.sort((a, b) => a.lane - b.lane);
+                            if (swimmers.length > 0) {
+                                newSwimmers.push({ acaraId: ev.id, seriIndex: seriIdx, swimmers: swimmers });
+                            }
+                        }
+                    });
+
+                    if (newEvents.length) {
+                        events = newEvents;
+                        swimmersData = newSwimmers;
+                        currentEventIndex = 0;
+                        currentSeriIndex = 0;
+                        saveAll();
+                        renderCurrentEvent();
+                        alert(`${newEvents.length} acara berhasil diproses!\n${importedSeriCount} seri/heat berhasil diimport.\n${newSwimmers.length} seri memiliki data starting list.`);
+                    } else {
+                        alert('Tidak ada data yang valid dalam CSV. Pastikan formatnya benar (lihat contoh format di atas).');
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            window.downloadCSVTemplate = function() {
+                const rows = [
+                    'Nama Acara,Deskripsi,Nama Seri,Starting List',
+                    'ACARA 101,50M GAYA BEBAS KU ABCD PUTRA,SERI 01,1:Eka Jaya:Aquatik Bandung|2:Juniar:AKSC Jakarta|3:Cahya Putri:Renang Jaya',
+                    'ACARA 101,50M GAYA BEBAS KU ABCD PUTRA,SERI 02,1:Budi Santoso:Tirta Renang|2:Sari Dewi:Aquatik Bandung',
+                    'ACARA 102,100M GAYA DADA PUTRI,SERI 01,1:Maya Sinta:Renang Jaya|2:Dewi Lestari:AKSC Jakarta'
+                ];
+                const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'template_meet_manager.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+
+            // ---------- EXPOSE FUNCTIONS ----------
+            window.updateUpcoming = (idx, field, value) => {
+                upcomingEvents[idx][field] = value;
+                saveAll();
+                if (isUpcomingVisible) renderUpcomingViewer();
+                renderUpcomingAdminForm();
+            };
+            window.deleteUpcoming = (idx) => {
+                upcomingEvents.splice(idx, 1);
+                saveAll();
+                if (isUpcomingVisible) renderUpcomingViewer();
+                renderUpcomingAdminForm();
+            };
+            window.addNewUpcoming = () => {
+                upcomingEvents.push({
+                    id: Date.now(),
+                    nama: 'Event Baru',
+                    tanggal: '',
+                    deskripsi: '',
+                    bg: 'img/bg.jpg'
+                });
+                saveAll();
+                if (isUpcomingVisible) renderUpcomingViewer();
+                renderUpcomingAdminForm();
+            };
+            window.updateLink = () => {
+                const v = document.getElementById('linkInput').value.trim();
+                if (v) { globalDriveLink = v; saveAll(); alert('Link berhasil disimpan!'); }
+            };
+            window.updateEventName = () => {
+                const input = document.getElementById('eventNameInput');
+                if (input && input.value.trim()) {
+                    eventName = input.value.trim();
+                    saveAll();
+                    renderCurrentEvent();
+                    renderAdminSection('eventname');
+                    alert('Nama event berhasil diupdate!');
+                }
+            };
+
+            // ---------- LOGIN ----------
+            function login() {
+                const input = document.getElementById('passwordInput');
+                const error = document.getElementById('loginError');
+                if (input.value === ADMIN_PASSWORD) {
+                    isAdmin = true;
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('adminStatusIndicator').classList.add('hidden');
+                    document.getElementById('logoutAdminBtn').classList.remove('hidden');
+                    document.getElementById('adminPanelContainer').classList.remove('hidden');
+                    document.getElementById('quickNavBar').classList.remove('hidden');
+                    renderAdminSection('dashboard');
+                    updateAdminNavControls();
+                    updateQuickNavBar();
+                    error.innerText = '';
+                    input.value = '';
+                } else {
+                    error.innerText = '❌ Password salah!';
+                    input.value = '';
+                    input.focus();
+                }
+            }
+            window.login = login;
+            window.logoutAdmin = function() {
+                isAdmin = false;
+                document.getElementById('adminStatusIndicator').classList.remove('hidden');
+                document.getElementById('logoutAdminBtn').classList.add('hidden');
+                document.getElementById('adminPanelContainer').classList.add('hidden');
+                document.getElementById('quickNavBar').classList.add('hidden');
+            };
+            window.toggleAdminModal = function() {
+                if (!isAdmin) {
+                    document.getElementById('loginModal').style.display = 'flex';
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('loginError').innerText = '';
+                    document.getElementById('passwordInput').focus();
+                }
+            };
+            window.closeModal = function() {
+                document.getElementById('loginModal').style.display = 'none';
+            };
+
+            // ---------- CLOSE MODAL ----------
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+            document.getElementById('loginModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeModal();
+            });
+
+            // ---------- EVENT BINDING ----------
+            document.getElementById('globalInfoBtn').addEventListener('click', () => {
+                if (!globalDriveLink) {
+                    alert('Link hasil lomba belum diatur. Admin perlu mengisinya dulu di menu Admin > Link Hasil.');
+                    return;
+                }
+                window.open(globalDriveLink, '_blank');
+            });
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    renderAdminSection(e.currentTarget.dataset.section);
+                });
+            });
+
+            // ---------- INIT ----------
+            loadFromStorage();
+            renderCurrentEvent();
+        })();
+    </script>
+</body>
+</html>
