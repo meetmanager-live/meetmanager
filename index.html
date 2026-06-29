@@ -770,14 +770,39 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+        // ============================================================
+        // 🔧 KONFIGURASI FIREBASE — ganti dengan config milikmu
+        //    Lihat TUTORIAL_FIREBASE.md untuk cara mendapatkan nilai ini
+        // ============================================================
+        const FIREBASE_CONFIG = {
+            apiKey:            "AIzaSyDSm_IMrzu8zUSgK3yshKGsfLF__ColpRQ",
+            authDomain:        "meetmanager-live.firebaseapp.com",
+            databaseURL:       "https://meetmanager-live-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId:         "meetmanager-live",
+            storageBucket:     "meetmanager-live.firebasestorage.app",
+            messagingSenderId: "377028052111",
+            appId:             "1:377028052111:web:43ab2c667a4c439cd39cfa"
+        };
+        // ============================================================
+
+        const app = initializeApp(FIREBASE_CONFIG);
+        const db  = getDatabase(app);
+
+        // Expose ke IIFE di bawah
+        window._firebaseSet    = set;
+        window._firebaseRef    = (path) => ref(db, path);
+        window._firebaseOnValue = onValue;
+        window._firebaseGet    = get;
+        window._firebaseReady  = true;
+    </script>
+
     <script>
         (function() {
-            // ---------- DEFAULT DATA ----------
-            // Sengaja dikosongkan: aplikasi dimulai tanpa data contoh.
-            // Isi data acara lewat menu Admin > Upload CSV.
-            const DEFAULT_EVENTS = [];
-            const DEFAULT_UPCOMING = [];
-
             // ---------- STATE ----------
             let events = [];
             let currentEventIndex = 0;
@@ -789,6 +814,78 @@
             let isAdmin = false;
             let isUpcomingVisible = false;
             const ADMIN_PASSWORD = 'admin123';
+            let _fbListenerAttached = false;
+
+            // ---------- PARSE CSV TEXT ----------
+            function parseCSVText(text) {
+                const lines = text.split('\n').filter(l => l.trim());
+                const newEvents = [];
+                const eventMap = {};
+                const newSwimmers = [];
+                let importedSeriCount = 0;
+
+                lines.forEach((line, idx) => {
+                    const parts = line.split(',').map(p => p.trim());
+                    if (parts.length < 3) return;
+                    if (idx === 0 && /^nama\s*acara$/i.test(parts[0])) return;
+                    const eventNama = parts[0];
+                    const deskripsi = parts[1] || '';
+                    const seriNama = parts[2] || `SERI ${String(importedSeriCount + 1).padStart(2, '0')}`;
+                    const swimmersRaw = parts[3] || '';
+                    if (!eventNama) return;
+
+                    if (!eventMap[eventNama]) {
+                        const eventId = 'ev_' + eventNama.replace(/\s+/g, '_');
+                        eventMap[eventNama] = { id: eventId, nama: eventNama, deskripsi: deskripsi, seri: [] };
+                        newEvents.push(eventMap[eventNama]);
+                    }
+                    const ev = eventMap[eventNama];
+                    if (deskripsi && !ev.deskripsi) ev.deskripsi = deskripsi;
+
+                    let seriIdx = ev.seri.indexOf(seriNama);
+                    if (seriIdx === -1) {
+                        ev.seri.push(seriNama);
+                        seriIdx = ev.seri.length - 1;
+                    }
+                    importedSeriCount++;
+
+                    if (swimmersRaw) {
+                        const lanes = swimmersRaw.split('|').map(l => l.trim()).filter(l => l);
+                        const swimmers = [];
+                        lanes.forEach(laneData => {
+                            const [lane, name, club] = laneData.split(':').map(p => p.trim());
+                            if (lane && name) {
+                                swimmers.push({ lane: parseInt(lane), name: name, club: club || '' });
+                            }
+                        });
+                        swimmers.sort((a, b) => a.lane - b.lane);
+                        if (swimmers.length > 0) {
+                            newSwimmers.push({ acaraId: ev.id, seriIndex: seriIdx, swimmers: swimmers });
+                        }
+                    }
+                });
+                return { newEvents, newSwimmers, importedSeriCount };
+            }
+
+            // ---------- FETCH data.csv DARI GITHUB ----------
+            async function loadDataCSV() {
+                try {
+                    const resp = await fetch('data.csv?_=' + Date.now());
+                    if (!resp.ok) throw new Error('File data.csv tidak ditemukan');
+                    const text = await resp.text();
+                    const { newEvents, newSwimmers } = parseCSVText(text);
+                    if (newEvents.length) {
+                        events = newEvents;
+                        swimmersData = newSwimmers;
+                        // Sesuaikan index agar tidak out-of-range
+                        if (currentEventIndex >= events.length) currentEventIndex = 0;
+                        const seriLen = events[currentEventIndex]?.seri?.length || 1;
+                        if (currentSeriIndex >= seriLen) currentSeriIndex = 0;
+                    }
+                } catch (e) {
+                    console.warn('data.csv tidak bisa dimuat:', e.message);
+                }
+            }
 
             // DOM refs
             const bgOverlay = document.getElementById('bgOverlay');
@@ -814,46 +911,64 @@
             updateClock();
             setInterval(updateClock, 1000);
 
-            // ---------- STORAGE ----------
-            function loadFromStorage() {
-                const storedEvents = localStorage.getItem('meet_events');
-                events = storedEvents ? JSON.parse(storedEvents) : JSON.parse(JSON.stringify(DEFAULT_EVENTS));
-                const storedUpcoming = localStorage.getItem('meet_upcoming');
-                upcomingEvents = storedUpcoming ? JSON.parse(storedUpcoming) : JSON.parse(JSON.stringify(DEFAULT_UPCOMING));
-                const storedSwimmers = localStorage.getItem('meet_swimmers');
-                swimmersData = storedSwimmers ? JSON.parse(storedSwimmers) : [];
-                globalDriveLink = localStorage.getItem('meet_driveLink') || '';
-                eventName = localStorage.getItem('meet_eventName') || 'Nama Kejuaraan Anda';
-                const storedEventIdx = localStorage.getItem('meet_currentEventIndex');
-                const storedSeriIdx = localStorage.getItem('meet_currentSeriIndex');
-                currentEventIndex = storedEventIdx !== null ? parseInt(storedEventIdx, 10) : 0;
-                currentSeriIndex = storedSeriIdx !== null ? parseInt(storedSeriIdx, 10) : 0;
+            // ---------- FIREBASE HELPERS ----------
+            function fbSet(path, value) {
+                if (!window._firebaseReady) return;
+                window._firebaseSet(window._firebaseRef(path), value);
+            }
 
-                if (!events || !events.length) events = JSON.parse(JSON.stringify(DEFAULT_EVENTS));
-                if (!upcomingEvents) upcomingEvents = JSON.parse(JSON.stringify(DEFAULT_UPCOMING));
-                if (currentEventIndex >= events.length) currentEventIndex = events.length - 1;
-                if (currentEventIndex < 0) currentEventIndex = 0;
-                if (events.length) {
-                    const seriLength = events[currentEventIndex].seri.length;
-                    if (currentSeriIndex >= seriLength) currentSeriIndex = seriLength - 1;
-                    if (currentSeriIndex < 0) currentSeriIndex = 0;
-                } else { currentSeriIndex = 0; }
+            // Simpan semua state ke Firebase (dipanggil setiap ada perubahan oleh admin)
+            function saveAll() {
+                const payload = {
+                    eventName:         eventName,
+                    globalDriveLink:   globalDriveLink,
+                    currentEventIndex: currentEventIndex,
+                    currentSeriIndex:  currentSeriIndex,
+                    upcomingEvents:    upcomingEvents.length ? upcomingEvents : []
+                };
+                fbSet('meet/state', payload);
                 updateBadge();
-                // background fixed (file lokal di folder img/, lihat TUTORIAL.md)
+            }
+
+            // Dengarkan perubahan dari Firebase — berlaku untuk semua pengunjung
+            function attachFirebaseListener() {
+                if (_fbListenerAttached || !window._firebaseReady) return;
+                _fbListenerAttached = true;
+                window._firebaseOnValue(window._firebaseRef('meet/state'), (snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) return;
+
+                    eventName       = data.eventName       || 'Nama Kejuaraan Anda';
+                    globalDriveLink = data.globalDriveLink || '';
+                    upcomingEvents  = data.upcomingEvents  || [];
+
+                    // Update posisi hanya jika beda (hindari re-render tidak perlu)
+                    const newEI = data.currentEventIndex ?? 0;
+                    const newSI = data.currentSeriIndex  ?? 0;
+                    const changed = (newEI !== currentEventIndex || newSI !== currentSeriIndex);
+                    currentEventIndex = newEI;
+                    currentSeriIndex  = newSI;
+
+                    // Koreksi jika out-of-range setelah CSV berubah
+                    if (currentEventIndex >= events.length) currentEventIndex = 0;
+                    if (events.length) {
+                        const seriLen = events[currentEventIndex]?.seri?.length || 1;
+                        if (currentSeriIndex >= seriLen) currentSeriIndex = 0;
+                    }
+
+                    updateBadge();
+                    renderCurrentEvent();
+                    if (isAdmin) updateAdminNavControls();
+                });
+            }
+
+            function loadFromStorage() {
+                // Hanya set background; data diambil dari Firebase & data.csv
                 bgOverlay.style.backgroundImage = `linear-gradient(180deg, rgba(0, 53, 84, 0.55) 0%, rgba(0, 119, 182, 0.25) 50%, rgba(0, 53, 84, 0.6) 100%), url('img/bg.jpg')`;
                 bgOverlay.style.backgroundSize = 'cover';
                 bgOverlay.style.backgroundPosition = 'center';
             }
-            function saveAll() {
-                localStorage.setItem('meet_events', JSON.stringify(events));
-                localStorage.setItem('meet_upcoming', JSON.stringify(upcomingEvents));
-                localStorage.setItem('meet_swimmers', JSON.stringify(swimmersData));
-                localStorage.setItem('meet_driveLink', globalDriveLink);
-                localStorage.setItem('meet_eventName', eventName);
-                localStorage.setItem('meet_currentEventIndex', String(currentEventIndex));
-                localStorage.setItem('meet_currentSeriIndex', String(currentSeriIndex));
-                updateBadge();
-            }
+
             function updateBadge() {
                 if (upcomingBadge) upcomingBadge.textContent = upcomingEvents.length;
             }
@@ -1044,20 +1159,35 @@
                 if (!events.length || !isAdmin) return;
                 const ev = events[currentEventIndex];
                 if (currentSeriIndex < ev.seri.length - 1) {
+                    // Masih ada seri berikutnya di acara ini
                     currentSeriIndex++;
-                    saveAll();
-                    renderCurrentEvent();
-                    setTimeout(updateAdminNavControls, 50);
+                } else if (currentEventIndex < events.length - 1) {
+                    // Seri habis → lanjut ke acara berikutnya, mulai dari seri pertama
+                    currentEventIndex++;
+                    currentSeriIndex = 0;
+                } else {
+                    alert('Ini sudah acara dan seri terakhir.');
+                    return;
                 }
+                saveAll();
+                renderCurrentEvent();
+                setTimeout(updateAdminNavControls, 50);
             };
             window.adminPrevSeri = function() {
                 if (!events.length || !isAdmin) return;
                 if (currentSeriIndex > 0) {
+                    // Masih ada seri sebelumnya di acara ini
                     currentSeriIndex--;
-                    saveAll();
-                    renderCurrentEvent();
-                    setTimeout(updateAdminNavControls, 50);
+                } else if (currentEventIndex > 0) {
+                    // Sudah di seri pertama → mundur ke acara sebelumnya, seri terakhirnya
+                    currentEventIndex--;
+                    currentSeriIndex = events[currentEventIndex].seri.length - 1;
+                } else {
+                    return; // Sudah di paling awal
                 }
+                saveAll();
+                renderCurrentEvent();
+                setTimeout(updateAdminNavControls, 50);
             };
             window.adminNextAcara = function() {
                 if (!events.length || !isAdmin) return;
@@ -1086,8 +1216,14 @@
                 let html = '';
                 switch (section) {
                     case 'dashboard':
+                        const fbStatus = window._firebaseReady
+                            ? '<span style="color:#0a7c3e;">✅ Terhubung — semua perubahan real-time ke pengunjung</span>'
+                            : '<span style="color:#e63946;">⚠️ Belum terhubung — isi FIREBASE_CONFIG di index.html (lihat TUTORIAL_FIREBASE.md)</span>';
                         html = `
                             <h3><i class="fas fa-chart-pie" style="color:#0077b6;"></i> Dashboard</h3>
+                            <div style="background:rgba(0,119,182,0.06);border-radius:1rem;padding:10px 14px;margin-bottom:12px;font-size:0.85rem;">
+                                <strong>Firebase:</strong> ${fbStatus}
+                            </div>
                             <p>Total Acara: <strong>${events.length}</strong> | Event Mendatang: <strong>${upcomingEvents.length}</strong></p>
                             <p style="margin-top:10px;">Acara saat ini: <strong style="color:#023e8a;">${events[currentEventIndex]?.nama || '-'}</strong></p>
                             <p>Seri: <strong style="color:#0077b6;">${events[currentEventIndex]?.seri[currentSeriIndex] || '-'}</strong></p>
@@ -1097,24 +1233,34 @@
                         break;
                     case 'upload':
                         html = `
-                            <h4><i class="fas fa-upload" style="color:#0077b6;"></i> Upload CSV</h4>
+                            <h4><i class="fas fa-file-csv" style="color:#0077b6;"></i> Update Data CSV</h4>
+                            <div style="background:rgba(0,119,182,0.06); border-radius:1rem; padding:1rem; margin-bottom:14px; font-size:0.88rem; color:#1a3a4a; border-left:4px solid #0077b6;">
+                                <strong>📌 Cara kerja baru:</strong><br>
+                                Data acara dibaca langsung dari file <code>data.csv</code> di repo GitHub kamu — sehingga <strong>semua pengunjung melihat data yang sama</strong> secara otomatis, tanpa perlu upload ulang di setiap perangkat.
+                            </div>
+
+                            <div style="background:white; border:2px solid rgba(0,119,182,0.2); border-radius:1rem; padding:1rem; margin-bottom:12px;">
+                                <p style="font-weight:700; color:#023e8a; margin-bottom:10px;"><i class="fas fa-list-ol" style="color:#0077b6;"></i> Langkah update data:</p>
+                                <ol style="padding-left:18px; color:#2a4a5a; font-size:0.88rem; line-height:2;">
+                                    <li>Edit file <code>data.csv</code> di komputermu (pakai Excel / Google Sheets / Notepad)</li>
+                                    <li>Buka repo GitHub kamu → klik file <code>data.csv</code></li>
+                                    <li>Klik ikon pensil ✏️ (Edit) → hapus semua isi lama → paste isi baru → <strong>Commit changes</strong></li>
+                                    <li>Tunggu 1–2 menit → refresh situs → data tampil untuk semua orang</li>
+                                </ol>
+                            </div>
+
                             <div class="csv-format-hint">
-                                <strong>Format CSV (dipisah koma) — satu baris = satu SERI/HEAT:</strong><br>
-                                <code>Nama Acara, Deskripsi, Nama Seri, Lane1:Nama1:Klub1|Lane2:Nama2:Klub2</code><br><br>
-                                <strong>Contoh (1 acara, 2 seri dengan perenang berbeda):</strong><br>
-                                <code>ACARA 101, 50M GAYA BEBAS KU ABCD PUTRA, SERI 01, 1:Eka Jaya:Aquatik Bandung|2:Juniar:AKSC Jakarta</code><br>
-                                <code>ACARA 101, 50M GAYA BEBAS KU ABCD PUTRA, SERI 02, 1:Budi:Tirta Renang|2:Sari:Aquatik Bandung</code><br>
-                                <code>ACARA 102, 100M GAYA DADA PUTRI, SERI 01, 1:Maya:Renang Jaya|2:Dewi:AKSC Jakarta</code><br><br>
-                                Baris dengan <strong>Nama Acara</strong> yang sama otomatis digabung jadi satu acara dengan beberapa seri.
-                                Kolom Deskripsi cukup diisi sekali saja (boleh dikosongkan di baris berikutnya).
-                                <strong>Lintasan maksimal 15</strong>, lintasan kosong otomatis tampil sebagai "-".
-                                Baris pertama yang berisi tulisan "Nama Acara" akan dianggap header dan dilewati otomatis.
+                                <strong>Format CSV — satu baris = satu SERI/HEAT:</strong><br>
+                                <code>Nama Acara,Deskripsi,Nama Seri,Lane:Nama:Klub|Lane:Nama:Klub</code><br><br>
+                                <strong>Contoh isi data.csv:</strong><br>
+                                <code>Nama Acara,Deskripsi,Nama Seri,Starting List</code><br>
+                                <code>ACARA 101,50M GAYA BEBAS PUTRA,SERI 01,1:Eka:Aquatik Bandung|2:Juniar:AKSC Jakarta</code><br>
+                                <code>ACARA 101,50M GAYA BEBAS PUTRA,SERI 02,1:Budi:Tirta Renang|2:Sari:Aquatik Bandung</code><br>
+                                <code>ACARA 102,100M GAYA DADA PUTRI,SERI 01,1:Maya:Renang Jaya|2:Dewi:AKSC Jakarta</code>
                             </div>
-                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
-                                <input type="file" id="csvFileInput" accept=".csv" style="flex:2 1 200px;">
-                                <button onclick="processCSV()" style="flex:1 1 120px;">Proses CSV</button>
-                            </div>
-                            <button class="secondary" onclick="downloadCSVTemplate()" style="width:100%;"><i class="fas fa-download"></i> Download Template CSV</button>
+
+                            <button class="secondary" onclick="downloadCSVTemplate()" style="width:100%;margin-bottom:8px;"><i class="fas fa-download"></i> Download Template data.csv</button>
+                            <button onclick="reloadDataCSV()" style="width:100%;"><i class="fas fa-sync-alt"></i> Muat Ulang data.csv Sekarang</button>
                         `;
                         break;
                     case 'link':
@@ -1169,97 +1315,27 @@
 
             // ---------- RESET DATA ----------
             window.resetAllData = function() {
-                if (confirm('Yakin ingin mereset semua data? Semua acara dan data perenang akan hilang!')) {
-                    localStorage.removeItem('meet_events');
-                    localStorage.removeItem('meet_upcoming');
-                    localStorage.removeItem('meet_swimmers');
-                    localStorage.removeItem('meet_driveLink');
-                    localStorage.removeItem('meet_eventName');
-                    localStorage.removeItem('meet_currentEventIndex');
-                    localStorage.removeItem('meet_currentSeriIndex');
-                    events = JSON.parse(JSON.stringify(DEFAULT_EVENTS));
-                    upcomingEvents = JSON.parse(JSON.stringify(DEFAULT_UPCOMING));
-                    swimmersData = [];
+                if (confirm('Yakin ingin mereset semua pengaturan? (Data acara dari data.csv tidak terpengaruh)')) {
+                    upcomingEvents  = [];
+                    globalDriveLink = '';
+                    eventName       = 'Nama Kejuaraan Anda';
                     currentEventIndex = 0;
-                    currentSeriIndex = 0;
+                    currentSeriIndex  = 0;
                     saveAll();
                     renderCurrentEvent();
                     renderAdminSection('dashboard');
-                    alert('Data berhasil direset!');
+                    alert('Pengaturan berhasil direset!');
                 }
             };
 
-            // ---------- PROCESS CSV ----------
-            // Format baru: satu baris = satu SERI/HEAT.
-            // Nama Acara, Deskripsi, Nama Seri, Lane:Nama:Klub|Lane:Nama:Klub|...
-            // Baris dengan Nama Acara yang sama digabung jadi satu acara dengan beberapa seri.
-            window.processCSV = function() {
-                const file = document.getElementById('csvFileInput')?.files[0];
-                if (!file) return alert('Pilih file CSV');
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const lines = e.target.result.split('\n').filter(l => l.trim());
-                    const newEvents = [];
-                    const eventMap = {};
-                    const newSwimmers = [];
-                    let importedSeriCount = 0;
-
-                    lines.forEach((line, idx) => {
-                        const parts = line.split(',').map(p => p.trim());
-                        if (parts.length < 3) return;
-                        // lewati baris header, contoh: "Nama Acara, Deskripsi, ..."
-                        if (idx === 0 && /^nama\s*acara$/i.test(parts[0])) return;
-
-                        const eventNama = parts[0];
-                        const deskripsi = parts[1] || '';
-                        const seriNama = parts[2] || `SERI ${String(importedSeriCount + 1).padStart(2, '0')}`;
-                        const swimmersRaw = parts[3] || '';
-                        if (!eventNama) return;
-
-                        if (!eventMap[eventNama]) {
-                            const eventId = Date.now() + Math.random().toString(36).substr(2, 5);
-                            eventMap[eventNama] = { id: eventId, nama: eventNama, deskripsi: deskripsi, seri: [] };
-                            newEvents.push(eventMap[eventNama]);
-                        }
-                        const ev = eventMap[eventNama];
-                        if (deskripsi && !ev.deskripsi) ev.deskripsi = deskripsi;
-
-                        let seriIdx = ev.seri.indexOf(seriNama);
-                        if (seriIdx === -1) {
-                            ev.seri.push(seriNama);
-                            seriIdx = ev.seri.length - 1;
-                        }
-                        importedSeriCount++;
-
-                        if (swimmersRaw) {
-                            const lanes = swimmersRaw.split('|').map(l => l.trim()).filter(l => l);
-                            const swimmers = [];
-                            lanes.forEach(laneData => {
-                                const [lane, name, club] = laneData.split(':').map(p => p.trim());
-                                if (lane && name) {
-                                    swimmers.push({ lane: parseInt(lane), name: name, club: club || '' });
-                                }
-                            });
-                            swimmers.sort((a, b) => a.lane - b.lane);
-                            if (swimmers.length > 0) {
-                                newSwimmers.push({ acaraId: ev.id, seriIndex: seriIdx, swimmers: swimmers });
-                            }
-                        }
-                    });
-
-                    if (newEvents.length) {
-                        events = newEvents;
-                        swimmersData = newSwimmers;
-                        currentEventIndex = 0;
-                        currentSeriIndex = 0;
-                        saveAll();
-                        renderCurrentEvent();
-                        alert(`${newEvents.length} acara berhasil diproses!\n${importedSeriCount} seri/heat berhasil diimport.\n${newSwimmers.length} seri memiliki data starting list.`);
-                    } else {
-                        alert('Tidak ada data yang valid dalam CSV. Pastikan formatnya benar (lihat contoh format di atas).');
-                    }
-                };
-                reader.readAsText(file);
+            // ---------- RELOAD DATA CSV ----------
+            window.reloadDataCSV = async function() {
+                const btn = event?.target;
+                if (btn) { btn.disabled = true; btn.textContent = 'Memuat...'; }
+                await loadDataCSV();
+                renderCurrentEvent();
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt"></i> Muat Ulang data.csv Sekarang'; }
+                alert('Data berhasil dimuat ulang dari data.csv!');
             };
 
             window.downloadCSVTemplate = function() {
@@ -1273,7 +1349,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'template_meet_manager.csv';
+                a.download = 'data.csv';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -1384,7 +1460,21 @@
 
             // ---------- INIT ----------
             loadFromStorage();
-            renderCurrentEvent();
+            loadDataCSV().then(() => {
+                // Tunggu Firebase SDK siap (module script async)
+                function tryAttach(attempts) {
+                    if (window._firebaseReady) {
+                        attachFirebaseListener();
+                    } else if (attempts > 0) {
+                        setTimeout(() => tryAttach(attempts - 1), 200);
+                    } else {
+                        // Firebase tidak tersedia — render dengan data CSV saja
+                        renderCurrentEvent();
+                        console.warn('Firebase tidak terhubung. Pastikan FIREBASE_CONFIG sudah diisi.');
+                    }
+                }
+                tryAttach(20);
+            });
         })();
     </script>
 </body>
