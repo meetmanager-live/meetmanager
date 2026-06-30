@@ -290,10 +290,10 @@
         .next-event-hint i { color: #ffd700; font-size: 0.72rem; }
         /* Coming Soon mode */
         .coming-soon-overlay { text-align: center; padding: 2.5rem 1.5rem; }
-        .coming-soon-title { font-size: 2.4rem; font-weight: 800; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.4), 0 2px 8px rgba(0,0,0,0.5); letter-spacing: 2px; margin-bottom: 0.5rem; }
+        .coming-soon-water-icon { font-size: 3rem; margin-bottom: 0.8rem; background: linear-gradient(135deg, #ffffff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .coming-soon-title { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #ffffff, #00d4ff, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 3px; margin-bottom: 0.8rem; }
         .coming-soon-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.8); font-weight: 600; margin-bottom: 0.3rem; }
-        .coming-soon-date { font-size: 0.95rem; color: rgba(255,215,0,0.8); font-weight: 600; margin-top: 4px; }
-        .coming-soon-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.8; }
+        .coming-soon-date { font-size: 1rem; color: rgba(255,255,255,0.95); font-weight: 700; margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; background: rgba(0,180,216,0.18); border: 1.5px solid rgba(0,212,255,0.35); padding: 0.45rem 1.4rem; border-radius: 2rem; }
 
         /* ── RESPONSIVE MOBILE ── */
         @media (max-width: 600px) {
@@ -362,13 +362,13 @@
         <span id="adminStatusIndicator" class="admin-btn hidden" onclick="toggleAdminModal()"></span>
 
         <div id="acaraBerlangsuingLabel" style="text-align:center;">
-            <span style="font-size:0.72rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.6);">ACARA BERLANGSUNG</span>
+            <span id="acaraLabel" style="font-size:0.72rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.6);">ACARA BERLANGSUNG</span>
         </div>
 
         <div id="currentEventPanel">
             <!-- Coming Soon Mode (shown when isLive = false) -->
             <div id="comingSoonOverlay" class="card-view coming-soon-overlay" style="display:none;">
-                <div class="coming-soon-icon">🏊</div>
+                <div class="coming-soon-water-icon"><i class="fas fa-water"></i></div>
                 <div class="coming-soon-title">COMING SOON</div>
                 <div id="csSeriTitle" class="coming-soon-subtitle"></div>
                 <div id="csEventTitle" class="coming-soon-subtitle" style="font-size:0.95rem; color:rgba(255,255,255,0.7);"></div>
@@ -488,6 +488,7 @@
             let isAdmin = false;
             let isUpcomingVisible = false;
             let isLive = true;
+            let comingSoonDate = '';
             const ADMIN_PASSWORD = 'admin123';
             let _fbListenerAttached = false;
 
@@ -618,7 +619,8 @@
                     currentEventIndex: currentEventIndex,
                     currentSeriIndex:  currentSeriIndex,
                     upcomingEvents:    upcomingEvents.length ? upcomingEvents : [],
-                    isLive:            isLive
+                    isLive:            isLive,
+                    comingSoonDate:    comingSoonDate
                 };
                 fbSet('meet/state', payload);
                 updateBadge();
@@ -636,6 +638,7 @@
                     globalDriveLink = data.globalDriveLink || '';
                     upcomingEvents  = data.upcomingEvents  || [];
                     isLive          = data.isLive !== undefined ? data.isLive : true;
+                    comingSoonDate  = data.comingSoonDate  || '';
 
                     // Update posisi hanya jika beda (hindari re-render tidak perlu)
                     const newEI = data.currentEventIndex ?? 0;
@@ -724,6 +727,10 @@
                     // ── COMING SOON MODE ──
                     if (comingSoonOverlay) comingSoonOverlay.style.display = 'block';
                     if (liveContent) liveContent.style.display = 'none';
+                    // Sembunyikan label "ACARA BERLANGSUNG", tapi nama event tetap tampil
+                    const acaraLabel = document.getElementById('acaraLabel');
+                    if (acaraLabel) acaraLabel.style.display = 'none';
+                    eventNameText.innerText = eventName || 'Kejuaraan Renang';
                     const nextE = events[currentEventIndex];
                     const nextSeri = nextE ? (nextE.seri[currentSeriIndex] || 'SERI 01') : '';
                     const nextNama = nextE ? nextE.nama : '';
@@ -732,8 +739,15 @@
                     const csDate = document.getElementById('csDate');
                     if (csSeri) csSeri.textContent = nextSeri ? `Pemanggilan ${nextSeri}` : '';
                     if (csEv)   csEv.textContent   = nextNama;
-                    // Show date from upcomingEvents if any, else blank
-                    if (csDate) csDate.textContent = upcomingEvents.length ? (upcomingEvents[0].tanggal || '') : '';
+                    if (csDate) {
+                        if (comingSoonDate) {
+                            csDate.innerHTML = `<i class="far fa-calendar-alt"></i> ${comingSoonDate}`;
+                            csDate.style.display = 'inline-flex';
+                        } else {
+                            csDate.textContent = '';
+                            csDate.style.display = 'none';
+                        }
+                    }
                     const nextHint = document.getElementById('nextEventHint');
                     if (nextHint) nextHint.style.display = 'none';
                     updateAdminNavControls();
@@ -744,6 +758,9 @@
                 // ── LIVE MODE ──
                 if (comingSoonOverlay) comingSoonOverlay.style.display = 'none';
                 if (liveContent) liveContent.style.display = 'block';
+                // Tampilkan kembali label
+                const acaraLabelEl = document.getElementById('acaraLabel');
+                if (acaraLabelEl) acaraLabelEl.style.display = '';
 
                 if (!events.length) {
                     eventDisplay.innerText = 'Tidak ada acara';
@@ -991,7 +1008,7 @@
                     case 'livetoggle':
                         html = `
                             <h4><i class="fas fa-broadcast-tower" style="color:#0077b6;"></i> Status LIVE</h4>
-                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:16px;">Aktifkan atau nonaktifkan tampilan LIVE. Jika <strong>OFF</strong>, viewer akan melihat <em>Coming Soon</em> beserta acara & seri berikutnya — tanpa Starting List.</p>
+                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:16px;">Aktifkan atau nonaktifkan tampilan LIVE. Jika <strong>OFF</strong>, viewer akan melihat <em>Coming Soon</em> beserta acara & seri berikutnya.</p>
                             <div style="display:flex; align-items:center; gap:16px; background:rgba(0,119,182,0.06); border-radius:1rem; padding:14px 18px; border:2px solid rgba(0,119,182,0.12); margin-bottom:14px;">
                                 <span style="font-size:2rem;">${isLive ? '🟢' : '🔴'}</span>
                                 <div>
@@ -999,9 +1016,15 @@
                                     <p style="color:#4a6a7a; font-size:0.82rem; margin-top:2px;">Klik tombol di bawah untuk mengubah status</p>
                                 </div>
                             </div>
-                            <button onclick="toggleLive()" style="width:100%; background:${isLive ? '#e63946' : '#0a7c3e'};">
+                            <button onclick="toggleLive()" style="width:100%; background:${isLive ? '#e63946' : '#0a7c3e'}; margin-bottom:16px;">
                                 ${isLive ? '<i class="fas fa-stop-circle"></i> Matikan LIVE (Coming Soon)' : '<i class="fas fa-play-circle"></i> Aktifkan LIVE'}
                             </button>
+                            <div style="border-top:1px solid rgba(0,119,182,0.15); padding-top:14px; margin-top:4px;">
+                                <p style="font-weight:700; color:#023e8a; font-size:0.88rem; margin-bottom:6px;"><i class="fas fa-calendar-alt" style="color:#0077b6;"></i> Tanggal di Coming Soon</p>
+                                <p style="color:#4a6a7a; font-size:0.82rem; margin-bottom:8px;">Ditampilkan di bawah info acara saat mode Coming Soon aktif.</p>
+                                <input id="comingSoonDateInput" value="${comingSoonDate}" placeholder="Contoh: Sabtu, 5 Juli 2026">
+                                <button onclick="saveComingSoonDate()" style="width:100%;"><i class="fas fa-save"></i> Simpan Tanggal</button>
+                            </div>
                         `;
                         break;
                         const fbStatus = window._firebaseReady
@@ -1152,6 +1175,16 @@
                 saveAll();
                 renderCurrentEvent();
                 renderAdminSection('livetoggle');
+            };
+
+            window.saveComingSoonDate = function() {
+                const input = document.getElementById('comingSoonDateInput');
+                if (input) {
+                    comingSoonDate = input.value.trim();
+                    saveAll();
+                    renderCurrentEvent();
+                    alert('Tanggal berhasil disimpan!');
+                }
             };
 
             // ---------- EXPOSE FUNCTIONS ----------
