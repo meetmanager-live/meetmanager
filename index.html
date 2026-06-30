@@ -67,39 +67,35 @@
             position: fixed;
             top: 20px;
             left: 20px;
-            width: 48px;
-            height: 48px;
+            width: 32px;
+            height: 32px;
             background: transparent;
             border: none;
-            border-radius: 14px;
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 5px;
             cursor: pointer;
             z-index: 999;
             transition: 0.25s;
             box-shadow: none;
         }
-        .admin-hamburger:hover { background: rgba(255,255,255,0.06); transform: scale(1.07); }
+        .admin-hamburger:hover { background: rgba(255,255,255,0.08); transform: scale(1.15); }
         .admin-hamburger span {
             display: block;
-            width: 20px;
-            height: 2.5px;
-            background: rgba(255,255,255,0.35);
-            border-radius: 2px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
             transition: 0.25s;
         }
-        .admin-hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
-        .admin-hamburger.active span:nth-child(2) { opacity: 0; }
-        .admin-hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+        .admin-hamburger.active span { background: rgba(255,182,39,0.85); box-shadow: 0 0 8px rgba(255,182,39,0.6); }
 
         /* Logout kecil di sebelah hamburger */
         .logout-pill {
             position: fixed;
             top: 20px;
-            left: 76px;
+            left: 60px;
             background: rgba(230,57,70,0.85);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -109,7 +105,7 @@
             font-size: 0.78rem;
             font-weight: 700;
             padding: 0 14px;
-            height: 48px;
+            height: 36px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -232,7 +228,7 @@
         .scoreboard-table tbody tr:hover { background: rgba(255,255,255,0.08); }
         .scoreboard-table tbody tr:last-child { border-bottom: none; }
         .scoreboard-table tbody td { padding: 0.5rem 0.8rem; vertical-align: middle; }
-        .scoreboard-table .lane-cell { font-weight: 800; color: #ffb627; font-size: 1rem; text-shadow: 0 0 8px rgba(255,182,39,0.4); }
+        .scoreboard-table .lane-cell { font-weight: 800; color: #ff4d5e; font-size: 1rem; text-shadow: 0 0 8px rgba(255,77,94,0.4); }
         .scoreboard-table .name-cell { font-weight: 600; color: rgba(255,255,255,0.9); }
         .scoreboard-table .club-cell { color: rgba(255,255,255,0.6); }
         .scoreboard-table .empty-row td, .scoreboard-table .empty-row .lane-cell { color: rgba(255,255,255,0.3); font-style: italic; }
@@ -285,8 +281,8 @@
         .real-time-clock { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.10); padding: 0.3rem 1rem; border-radius: 2rem; font-weight: 600; color: rgba(255,255,255,0.85); font-size: 0.88rem; border: 1px solid rgba(255,255,255,0.18); }
         .real-time-clock i { color: #00d4ff; }
         /* Next event hint below seri */
-        .next-event-hint { margin-top: 6px; display: inline-flex; align-items: center; gap: 7px; background: rgba(255,182,39,0.18); border: 1.5px solid rgba(255,182,39,0.5); padding: 0.38rem 1.2rem; border-radius: 2rem; font-size: 0.88rem; color: #ffd97a; font-weight: 700; box-shadow: 0 2px 10px rgba(255,182,39,0.15); }
-        .next-event-hint i { color: #ffb627; font-size: 0.85rem; }
+        .next-event-hint { margin-top: 6px; display: inline-flex; align-items: center; gap: 7px; background: rgba(230,57,70,0.18); border: 1.5px solid rgba(230,57,70,0.5); padding: 0.38rem 1.2rem; border-radius: 2rem; font-size: 0.88rem; color: #ff8a93; font-weight: 700; box-shadow: 0 2px 10px rgba(230,57,70,0.15); }
+        .next-event-hint i { color: #ff4d5e; font-size: 0.85rem; }
         /* Coming Soon mode */
         .coming-soon-overlay { text-align: center; padding: 2.5rem 1.5rem; }
         .coming-soon-water-icon { font-size: 3rem; margin-bottom: 0.8rem; background: linear-gradient(135deg, #ffffff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -321,8 +317,8 @@
             .menu-btn { flex: 1 1 auto; font-size: 0.78rem; padding: 0.55rem 0.8rem; }
             .upcoming-float-btn { top: 14px; right: 12px; padding: 0.5rem 0.9rem; font-size: 0.7rem; gap: 5px; }
             .upcoming-float-btn .badge-count { display: none; }
-            .admin-hamburger { top: 12px; left: 12px; width: 44px; height: 44px; }
-            .logout-pill { top: 12px; left: 64px; height: 44px; font-size: 0.72rem; }
+            .admin-hamburger { top: 12px; left: 12px; width: 28px; height: 28px; }
+            .logout-pill { top: 12px; left: 50px; height: 32px; font-size: 0.72rem; }
             .upcoming-item .btn-group { flex-direction: column; }
         }
         @media (min-width: 601px) and (max-width: 1024px) {
@@ -337,7 +333,7 @@
 
     <!-- Hamburger Admin (kiri atas) -->
     <div class="admin-hamburger" id="adminHamburger" onclick="toggleAdminModal()">
-        <span></span><span></span><span></span>
+        <span></span>
     </div>
     <button class="logout-pill hidden" id="logoutAdminBtn" onclick="logoutAdmin()">
         <i class="fas fa-sign-out-alt"></i> Logout
@@ -490,7 +486,7 @@
             let isUpcomingVisible = false;
             let isLive = true;
             let comingSoonDate = '';
-            const ADMIN_PASSWORD = 'best22';
+            const ADMIN_PASSWORD = 'admin123';
             let _fbListenerAttached = false;
 
             // ---------- PARSE CSV TEXT ----------
@@ -738,7 +734,7 @@
                     const csSeri = document.getElementById('csSeriTitle');
                     const csEv   = document.getElementById('csEventTitle');
                     const csDate = document.getElementById('csDate');
-                    if (csSeri) csSeri.textContent = nextSeri ? `Pemanggilan ${nextSeri}` : '';
+                    if (csSeri) csSeri.textContent = nextSeri ? `Next ${nextSeri}` : '';
                     if (csEv)   csEv.textContent   = nextNama;
                     if (csDate) {
                         if (comingSoonDate) {
@@ -791,14 +787,14 @@
                     // Extract next acara number from same event name
                     const dashIdx = ev.nama.indexOf(' - ');
                     const acaraNum = dashIdx >= 0 ? ev.nama.substring(0, dashIdx).trim() : ev.nama;
-                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
+                    nextLabel = `Next ${nextSeri} — ACARA ${acaraNum}`;
                 } else if (currentEventIndex < events.length - 1) {
                     // next event, first seri
                     const nextEv = events[currentEventIndex + 1];
                     const nextSeri = nextEv.seri[0] || 'SERI 01';
                     const dashIdx = nextEv.nama.indexOf(' - ');
                     const acaraNum = dashIdx >= 0 ? nextEv.nama.substring(0, dashIdx).trim() : nextEv.nama;
-                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
+                    nextLabel = `Next ${nextSeri} — ACARA ${acaraNum}`;
                 }
                 if (nextHint && nextHintText) {
                     if (nextLabel) {
