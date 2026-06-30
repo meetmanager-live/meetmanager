@@ -366,6 +366,13 @@
         </div>
 
         <div id="currentEventPanel">
+            <!-- Nama event selalu tampil (live on maupun off) -->
+            <div id="eventNameDisplay" class="event-subtitle" style="margin-bottom:0.5rem;">
+                <i class="fas fa-trophy"></i>
+                <span id="eventNameText">Memuat...</span>
+                <span id="liveBadge" class="status-badge live"><i class="fas fa-circle"></i> LIVE</span>
+            </div>
+
             <!-- Coming Soon Mode (shown when isLive = false) -->
             <div id="comingSoonOverlay" class="card-view coming-soon-overlay" style="display:none;">
                 <div class="coming-soon-water-icon"><i class="fas fa-water"></i></div>
@@ -377,11 +384,6 @@
 
             <div id="liveContent">
             <div class="card-view">
-                <div id="eventNameDisplay" class="event-subtitle">
-                    <i class="fas fa-trophy"></i>
-                    <span id="eventNameText">Memuat...</span>
-                    <span id="liveBadge" class="status-badge live"><i class="fas fa-circle"></i> LIVE</span>
-                </div>
                 <div id="eventDisplay" class="event-title">Belum ada acara</div>
                 <div class="viewer-status">
                     <span id="seriDisplay" class="seri-badge"></span>
@@ -872,7 +874,7 @@
             // ---------- TOGGLE UPCOMING ----------
             window.toggleUpcoming = function() {
                 isUpcomingVisible = !isUpcomingVisible;
-                const label = document.getElementById('acaraBerlangsuingLabel');
+                const acaraLabel = document.getElementById('acaraLabel');
                 if (isUpcomingVisible) {
                     upcomingPanel.classList.add('active');
                     renderUpcomingViewer();
@@ -881,7 +883,7 @@
                     floatBtnIcon.className = 'fas fa-arrow-left';
                     floatBtnIcon.style.fontSize = '0.7rem';
                     document.getElementById('currentEventPanel').style.display = 'none';
-                    if (label) label.querySelector('span').textContent = 'OUR MANAGED EVENTS';
+                    if (acaraLabel) { acaraLabel.style.display = ''; acaraLabel.textContent = 'OUR MANAGED EVENTS'; }
                 } else {
                     upcomingPanel.classList.remove('active');
                     floatBtn.classList.remove('back-btn');
@@ -889,7 +891,9 @@
                     floatBtnIcon.className = 'fas fa-chevron-right';
                     floatBtnIcon.style.fontSize = '0.7rem';
                     document.getElementById('currentEventPanel').style.display = 'block';
-                    if (label) label.querySelector('span').textContent = 'ACARA BERLANGSUNG';
+                    if (acaraLabel) { acaraLabel.textContent = 'ACARA BERLANGSUNG'; }
+                    // Re-apply isLive state untuk label
+                    if (!isLive && acaraLabel) acaraLabel.style.display = 'none';
                 }
             };
 
