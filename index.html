@@ -47,14 +47,14 @@
         .app-container {
             width: 100%;
             max-width: 950px;
-            background: rgba(255,255,255,0.55);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1.5px solid rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1.5px solid rgba(255,255,255,0.28);
             border-radius: 2.5rem;
             padding: 1.8rem 1.8rem 2.2rem;
-            box-shadow: 0 25px 60px -15px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.7);
-            color: #1a2a3a;
+            box-shadow: 0 25px 60px -15px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.4);
+            color: #ffffff;
             transition: all 0.3s;
             display: flex;
             flex-direction: column;
@@ -167,7 +167,7 @@
             font-weight: 800;
             font-size: 1.9rem;
             letter-spacing: 1px;
-            background: linear-gradient(135deg, #0077b6, #00b4d8, #0077b6);
+            background: linear-gradient(135deg, #ffffff, #00d4ff, #ffffff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -175,7 +175,7 @@
             align-items: center;
             gap: 8px;
         }
-        .logo i { background: none; -webkit-text-fill-color: #0077b6; font-size: 2rem; }
+        .logo i { background: none; -webkit-text-fill-color: #00d4ff; font-size: 2rem; }
         /* sembunyikan admin-btn lama dari HTML — diganti hamburger */
         .admin-btn { display: none !important; }
         .tabs {
@@ -202,42 +202,42 @@
             box-shadow: 0 6px 20px -6px rgba(0,119,182,0.4);
         }
         .card-view {
-            background: linear-gradient(145deg, rgba(255,255,255,0.70), rgba(240,248,252,0.60));
+            background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(0,119,182,0.10));
             backdrop-filter: blur(10px);
             border-radius: 2rem;
             padding: 1.6rem;
-            border: 1.5px solid rgba(255,255,255,0.55);
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), 0 6px 24px rgba(0,119,182,0.07);
+            border: 1.5px solid rgba(255,255,255,0.22);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.15), 0 6px 24px rgba(0,0,0,0.12);
         }
-        .event-title { font-size: 2rem; font-weight: 800; color: #023e8a; margin-bottom: 0.3rem; word-break: break-word; }
-        .event-subtitle { font-size: 1.05rem; color: #0077b6; margin-bottom: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .event-subtitle i { color: #00b4d8; }
-        .seri-badge { background: linear-gradient(135deg,#0077b6,#00b4d8); color: white; font-weight: 700; padding: 0.4rem 1.3rem; border-radius: 2rem; display: inline-block; font-size: 0.88rem; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,119,182,0.3); }
-        .seri-counter { color: #4a6a7a; font-size: 0.88rem; font-weight: 600; margin-left: 10px; }
+        .event-title { font-size: 2rem; font-weight: 800; color: #ffffff; margin-bottom: 0.3rem; word-break: break-word; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .event-subtitle { font-size: 1.05rem; color: rgba(255,255,255,0.85); margin-bottom: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .event-subtitle i { color: #00d4ff; }
+        .seri-badge { background: linear-gradient(135deg,rgba(0,119,182,0.7),rgba(0,180,216,0.7)); color: white; font-weight: 700; padding: 0.4rem 1.3rem; border-radius: 2rem; display: inline-block; font-size: 0.88rem; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); backdrop-filter: blur(4px); }
+        .seri-counter { color: rgba(255,255,255,0.75); font-size: 0.88rem; font-weight: 600; margin-left: 10px; }
         .viewer-status { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
-        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,119,182,0.08); border: 1px solid rgba(0,119,182,0.15); padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.78rem; color: #2a4a5a; font-weight: 600; }
-        .status-badge i { color: #0077b6; }
-        .status-badge.live i { color: #e63946; animation: pulse 1.2s infinite; }
-        .status-badge.live { background: rgba(230,57,70,0.08); border-color: rgba(230,57,70,0.2); color: #e63946; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.78rem; color: rgba(255,255,255,0.85); font-weight: 600; backdrop-filter: blur(4px); }
+        .status-badge i { color: rgba(255,255,255,0.7); }
+        .status-badge.live i { color: #ff4d5e; animation: pulse 1.2s infinite; }
+        .status-badge.live { background: rgba(230,57,70,0.2); border-color: rgba(230,57,70,0.4); color: #ff8a93; }
         @keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.3; transform:scale(0.8); } }
-        .event-desc { margin-top: 14px; color: #2a4a5a; font-size: 0.97rem; font-weight: 500; padding: 10px 14px; background: rgba(0,119,182,0.06); border-radius: 1rem; border-left: 4px solid #0077b6; }
-        .event-desc i { color: #0077b6; margin-right: 8px; }
-        .swimmers-section { margin-top: 1rem; background: rgba(255,255,255,0.50); backdrop-filter: blur(8px); border-radius: 1.5rem; padding: 1.2rem; border: 1.5px solid rgba(255,255,255,0.5); }
-        .swimmers-section h4 { color: #023e8a; font-size: 1rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
-        .swimmers-section h4 i { color: #0077b6; }
+        .event-desc { margin-top: 14px; color: rgba(255,255,255,0.8); font-size: 0.97rem; font-weight: 500; padding: 10px 14px; background: rgba(255,255,255,0.08); border-radius: 1rem; border-left: 4px solid rgba(0,180,216,0.7); }
+        .event-desc i { color: #00d4ff; margin-right: 8px; }
+        .swimmers-section { margin-top: 1rem; background: rgba(255,255,255,0.08); backdrop-filter: blur(8px); border-radius: 1.5rem; padding: 1.2rem; border: 1.5px solid rgba(255,255,255,0.15); }
+        .swimmers-section h4 { color: rgba(255,255,255,0.9); font-size: 1rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
+        .swimmers-section h4 i { color: #00d4ff; }
         .scoreboard-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .scoreboard-table thead th { background: linear-gradient(135deg,#0077b6,#00b4d8); color: white; padding: 0.6rem 0.8rem; text-align: left; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 3px solid #023e8a; }
+        .scoreboard-table thead th { background: linear-gradient(135deg,rgba(0,119,182,0.7),rgba(0,180,216,0.7)); color: white; padding: 0.6rem 0.8rem; text-align: left; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 3px solid rgba(0,53,84,0.5); }
         .scoreboard-table thead th:first-child { border-radius: 0.8rem 0 0 0; width: 70px; }
         .scoreboard-table thead th:last-child { border-radius: 0 0.8rem 0 0; }
-        .scoreboard-table tbody tr { transition: 0.2s; border-bottom: 1px solid rgba(0,119,182,0.06); }
-        .scoreboard-table tbody tr:hover { background: rgba(0,119,182,0.04); }
+        .scoreboard-table tbody tr { transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .scoreboard-table tbody tr:hover { background: rgba(255,255,255,0.08); }
         .scoreboard-table tbody tr:last-child { border-bottom: none; }
         .scoreboard-table tbody td { padding: 0.5rem 0.8rem; vertical-align: middle; }
-        .scoreboard-table .lane-cell { font-weight: 800; color: #0077b6; font-size: 0.9rem; }
-        .scoreboard-table .name-cell { font-weight: 600; color: #023e8a; }
-        .scoreboard-table .club-cell { color: #4a6a7a; }
-        .scoreboard-table .empty-row td, .scoreboard-table .empty-row .lane-cell { color: #b0b8c0; font-style: italic; }
-        .no-swimmers { color: #4a6a7a; font-size: 0.9rem; padding: 0.8rem; text-align: center; background: rgba(0,0,0,0.02); border-radius: 1rem; }
+        .scoreboard-table .lane-cell { font-weight: 800; color: #00d4ff; font-size: 0.9rem; }
+        .scoreboard-table .name-cell { font-weight: 600; color: rgba(255,255,255,0.9); }
+        .scoreboard-table .club-cell { color: rgba(255,255,255,0.6); }
+        .scoreboard-table .empty-row td, .scoreboard-table .empty-row .lane-cell { color: rgba(255,255,255,0.3); font-style: italic; }
+        .no-swimmers { color: rgba(255,255,255,0.6); font-size: 0.9rem; padding: 0.8rem; text-align: center; background: rgba(255,255,255,0.05); border-radius: 1rem; }
         .global-link-btn { background: linear-gradient(135deg,#0077b6,#00b4d8); border: none; color: white; padding: 0.9rem 1.5rem; border-radius: 2.5rem; font-weight: 700; cursor: pointer; width: 100%; margin: 0.5rem 0; transition: 0.3s; text-align: center; font-size: 1rem; box-shadow: 0 8px 25px -8px rgba(0,119,182,0.4); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .global-link-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 35px -8px rgba(0,119,182,0.5); background: linear-gradient(135deg,#023e8a,#0077b6); }
         .upcoming-panel { display: none; animation: fadeSlideIn 0.3s ease; }
@@ -250,7 +250,7 @@
         .event-card h3 { font-size:1.5rem; font-weight:700; color:#ffd700; margin-bottom:4px; }
         .event-card .event-date { color:rgba(255,255,255,0.8); font-size:0.95rem; margin-bottom:4px; }
         .event-card .event-desc-upcoming { color:rgba(255,255,255,0.7); font-size:0.9rem; }
-        .admin-panel { background: rgba(255,255,255,0.80); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 2rem; padding: 1.8rem; border: 1.5px solid rgba(255,255,255,0.5); margin-top: 0.5rem; width: 100%; box-shadow: 0 8px 40px rgba(0,119,182,0.1); }
+        .admin-panel { background: rgba(255,255,255,0.80); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 2rem; padding: 1.8rem; border: 1.5px solid rgba(255,255,255,0.5); margin-top: 0.5rem; width: 100%; box-shadow: 0 8px 40px rgba(0,119,182,0.1); color: #1a2a3a; }
         .admin-grid { display: flex; flex-wrap: wrap; gap: 1.5rem; }
         .admin-sidebar { flex: 1 1 200px; display: flex; flex-direction: column; gap: 10px; }
         .admin-content { flex: 3 1 500px; background: rgba(0,119,182,0.04); border-radius: 1.5rem; padding: 1.5rem; border: 1px solid rgba(0,119,182,0.1); }
@@ -283,8 +283,17 @@
         @keyframes waveMove { 0%{ background-position:0 0; } 100%{ background-position:200px 0; } }
         .csv-format-hint { background: rgba(0,119,182,0.05); border-radius: 1rem; padding: 1rem; margin: 0.5rem 0 1rem; font-size: 0.85rem; color: #2a4a5a; }
         .csv-format-hint code { background: #e8ecf0; padding: 0.2rem 0.5rem; border-radius: 0.3rem; font-size: 0.8rem; }
-        .real-time-clock { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.04); padding: 0.3rem 1rem; border-radius: 2rem; font-weight: 600; color: #023e8a; font-size: 0.88rem; border: 1px solid rgba(0,119,182,0.1); }
-        .real-time-clock i { color: #0077b6; }
+        .real-time-clock { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.10); padding: 0.3rem 1rem; border-radius: 2rem; font-weight: 600; color: rgba(255,255,255,0.85); font-size: 0.88rem; border: 1px solid rgba(255,255,255,0.18); }
+        .real-time-clock i { color: #00d4ff; }
+        /* Next event hint below seri */
+        .next-event-hint { margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,215,0,0.10); border: 1px solid rgba(255,215,0,0.28); padding: 0.28rem 1rem; border-radius: 2rem; font-size: 0.78rem; color: rgba(255,215,0,0.95); font-weight: 600; }
+        .next-event-hint i { color: #ffd700; font-size: 0.72rem; }
+        /* Coming Soon mode */
+        .coming-soon-overlay { text-align: center; padding: 2.5rem 1.5rem; }
+        .coming-soon-title { font-size: 2.4rem; font-weight: 800; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.4), 0 2px 8px rgba(0,0,0,0.5); letter-spacing: 2px; margin-bottom: 0.5rem; }
+        .coming-soon-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.8); font-weight: 600; margin-bottom: 0.3rem; }
+        .coming-soon-date { font-size: 0.95rem; color: rgba(255,215,0,0.8); font-weight: 600; margin-top: 4px; }
+        .coming-soon-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.8; }
 
         /* ── RESPONSIVE MOBILE ── */
         @media (max-width: 600px) {
@@ -352,16 +361,26 @@
         <!-- tombol admin lama disembunyikan via CSS, tapi tetap ada untuk JS -->
         <span id="adminStatusIndicator" class="admin-btn hidden" onclick="toggleAdminModal()"></span>
 
-        <div style="text-align:center;">
-            <span style="font-size:0.72rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(0,119,182,0.7);">ACARA BERLANGSUNG</span>
+        <div id="acaraBerlangsuingLabel" style="text-align:center;">
+            <span style="font-size:0.72rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.6);">ACARA BERLANGSUNG</span>
         </div>
 
         <div id="currentEventPanel">
+            <!-- Coming Soon Mode (shown when isLive = false) -->
+            <div id="comingSoonOverlay" class="card-view coming-soon-overlay" style="display:none;">
+                <div class="coming-soon-icon">🏊</div>
+                <div class="coming-soon-title">COMING SOON</div>
+                <div id="csSeriTitle" class="coming-soon-subtitle"></div>
+                <div id="csEventTitle" class="coming-soon-subtitle" style="font-size:0.95rem; color:rgba(255,255,255,0.7);"></div>
+                <div id="csDate" class="coming-soon-date"></div>
+            </div>
+
+            <div id="liveContent">
             <div class="card-view">
                 <div id="eventNameDisplay" class="event-subtitle">
                     <i class="fas fa-trophy"></i>
                     <span id="eventNameText">Memuat...</span>
-                    <span class="status-badge live"><i class="fas fa-circle"></i> LIVE</span>
+                    <span id="liveBadge" class="status-badge live"><i class="fas fa-circle"></i> LIVE</span>
                 </div>
                 <div id="eventDisplay" class="event-title">Belum ada acara</div>
                 <div class="viewer-status">
@@ -369,6 +388,9 @@
                     <span id="seriCounter" class="seri-counter"></span>
                     <span class="status-badge"><i class="fas fa-clock"></i><span id="eventTimeDisplay">-</span></span>
                     <span class="real-time-clock" id="realTimeClock"><i class="fas fa-clock"></i><span id="clockDisplay">00:00:00</span></span>
+                </div>
+                <div id="nextEventHint" class="next-event-hint" style="display:none;">
+                    <i class="fas fa-forward"></i> <span id="nextEventHintText"></span>
                 </div>
                 <div class="event-desc" id="eventDesc"><i class="fas fa-flag-checkered"></i> Tambahkan data acara lewat menu Admin &gt; Upload CSV</div>
                 <div id="quickNavBar" class="admin-nav-controls hidden">
@@ -385,6 +407,7 @@
             </div>
 
             <button id="globalInfoBtn" class="global-link-btn"><i class="fas fa-file-pdf"></i> 📄 INFORMASI HASIL LOMBA</button>
+            </div><!-- end liveContent -->
         </div>
 
         <div class="upcoming-panel" id="upcomingPanel">
@@ -395,6 +418,7 @@
             <div class="admin-grid">
                 <div class="admin-sidebar" id="adminSidebar">
                     <button class="menu-btn active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                    <button class="menu-btn" data-section="livetoggle"><i class="fas fa-broadcast-tower"></i> Live / Off</button>
                     <button class="menu-btn" data-section="upload"><i class="fas fa-upload"></i> Upload CSV</button>
                     <button class="menu-btn" data-section="link"><i class="fas fa-link"></i> Link Hasil</button>
                     <button class="menu-btn" data-section="upcoming"><i class="fas fa-calendar-plus"></i> Event Selanjutnya</button>
@@ -463,6 +487,7 @@
             let eventName = 'Nama Kejuaraan Anda';
             let isAdmin = false;
             let isUpcomingVisible = false;
+            let isLive = true;
             const ADMIN_PASSWORD = 'admin123';
             let _fbListenerAttached = false;
 
@@ -592,7 +617,8 @@
                     globalDriveLink:   globalDriveLink,
                     currentEventIndex: currentEventIndex,
                     currentSeriIndex:  currentSeriIndex,
-                    upcomingEvents:    upcomingEvents.length ? upcomingEvents : []
+                    upcomingEvents:    upcomingEvents.length ? upcomingEvents : [],
+                    isLive:            isLive
                 };
                 fbSet('meet/state', payload);
                 updateBadge();
@@ -609,6 +635,7 @@
                     eventName       = data.eventName       || 'Nama Kejuaraan Anda';
                     globalDriveLink = data.globalDriveLink || '';
                     upcomingEvents  = data.upcomingEvents  || [];
+                    isLive          = data.isLive !== undefined ? data.isLive : true;
 
                     // Update posisi hanya jika beda (hindari re-render tidak perlu)
                     const newEI = data.currentEventIndex ?? 0;
@@ -656,7 +683,15 @@
                     return;
                 }
                 const sorted = [...swimmerData.swimmers].sort((a, b) => a.lane - b.lane);
-                const maxLane = Math.min(Math.max(...sorted.map(s => s.lane), 0), 15);
+
+                // Hitung maxLane dari SEMUA seri acara ini — supaya jumlah lintasan konsisten
+                const allSeriesOfEvent = swimmersData.filter(s => s.acaraId === eventId);
+                const globalMaxLane = allSeriesOfEvent.reduce((max, s) => {
+                    const m = Math.max(...s.swimmers.map(sw => sw.lane), 0);
+                    return Math.max(max, m);
+                }, 0);
+                const maxLane = Math.min(Math.max(globalMaxLane, sorted.length > 0 ? Math.max(...sorted.map(s=>s.lane)) : 0), 15);
+
                 let html = `
                     <table class="scoreboard-table">
                         <thead><tr><th>LANE</th><th>NAME</th><th>TEAM</th></tr></thead>
@@ -677,6 +712,39 @@
             // ---------- RENDER UI ----------
             function renderCurrentEvent() {
                 eventNameText.innerText = eventName || 'Kejuaraan Renang';
+
+                // Live badge visibility
+                const liveBadge = document.getElementById('liveBadge');
+                if (liveBadge) liveBadge.style.display = isLive ? '' : 'none';
+
+                const comingSoonOverlay = document.getElementById('comingSoonOverlay');
+                const liveContent = document.getElementById('liveContent');
+
+                if (!isLive) {
+                    // ── COMING SOON MODE ──
+                    if (comingSoonOverlay) comingSoonOverlay.style.display = 'block';
+                    if (liveContent) liveContent.style.display = 'none';
+                    const nextE = events[currentEventIndex];
+                    const nextSeri = nextE ? (nextE.seri[currentSeriIndex] || 'SERI 01') : '';
+                    const nextNama = nextE ? nextE.nama : '';
+                    const csSeri = document.getElementById('csSeriTitle');
+                    const csEv   = document.getElementById('csEventTitle');
+                    const csDate = document.getElementById('csDate');
+                    if (csSeri) csSeri.textContent = nextSeri ? `Pemanggilan ${nextSeri}` : '';
+                    if (csEv)   csEv.textContent   = nextNama;
+                    // Show date from upcomingEvents if any, else blank
+                    if (csDate) csDate.textContent = upcomingEvents.length ? (upcomingEvents[0].tanggal || '') : '';
+                    const nextHint = document.getElementById('nextEventHint');
+                    if (nextHint) nextHint.style.display = 'none';
+                    updateAdminNavControls();
+                    updateQuickNavBar();
+                    return;
+                }
+
+                // ── LIVE MODE ──
+                if (comingSoonOverlay) comingSoonOverlay.style.display = 'none';
+                if (liveContent) liveContent.style.display = 'block';
+
                 if (!events.length) {
                     eventDisplay.innerText = 'Tidak ada acara';
                     seriDisplay.innerText = '';
@@ -684,6 +752,8 @@
                     eventDesc.innerHTML = '';
                     eventTimeDisplay.innerText = '-';
                     swimmersContainer.innerHTML = '<div class="no-swimmers">Tidak ada acara</div>';
+                    const nextHint = document.getElementById('nextEventHint');
+                    if (nextHint) nextHint.style.display = 'none';
                     return;
                 }
                 const ev = events[currentEventIndex];
@@ -692,6 +762,35 @@
                 seriCounter.innerText = `${currentSeriIndex + 1} / ${ev.seri.length}`;
                 eventDesc.innerHTML = `<i class="fas fa-flag-checkered"></i> ${ev.deskripsi || ''}`;
                 eventTimeDisplay.innerText = 'Sedang Berlangsung';
+
+                // ── Next event hint ──
+                const nextHint = document.getElementById('nextEventHint');
+                const nextHintText = document.getElementById('nextEventHintText');
+                let nextLabel = '';
+                if (currentSeriIndex < ev.seri.length - 1) {
+                    // next seri in same event
+                    const nextSeri = ev.seri[currentSeriIndex + 1];
+                    // Extract next acara number from same event name
+                    const dashIdx = ev.nama.indexOf(' - ');
+                    const acaraNum = dashIdx >= 0 ? ev.nama.substring(0, dashIdx).trim() : ev.nama;
+                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
+                } else if (currentEventIndex < events.length - 1) {
+                    // next event, first seri
+                    const nextEv = events[currentEventIndex + 1];
+                    const nextSeri = nextEv.seri[0] || 'SERI 01';
+                    const dashIdx = nextEv.nama.indexOf(' - ');
+                    const acaraNum = dashIdx >= 0 ? nextEv.nama.substring(0, dashIdx).trim() : nextEv.nama;
+                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
+                }
+                if (nextHint && nextHintText) {
+                    if (nextLabel) {
+                        nextHintText.textContent = nextLabel;
+                        nextHint.style.display = 'inline-flex';
+                    } else {
+                        nextHint.style.display = 'none';
+                    }
+                }
+
                 renderSwimmers();
                 updateAdminNavControls();
                 updateQuickNavBar();
@@ -756,6 +855,7 @@
             // ---------- TOGGLE UPCOMING ----------
             window.toggleUpcoming = function() {
                 isUpcomingVisible = !isUpcomingVisible;
+                const label = document.getElementById('acaraBerlangsuingLabel');
                 if (isUpcomingVisible) {
                     upcomingPanel.classList.add('active');
                     renderUpcomingViewer();
@@ -764,7 +864,7 @@
                     floatBtnIcon.className = 'fas fa-arrow-left';
                     floatBtnIcon.style.fontSize = '0.7rem';
                     document.getElementById('currentEventPanel').style.display = 'none';
-                    document.querySelector('.tabs').style.display = 'none';
+                    if (label) label.querySelector('span').textContent = 'OUR MANAGED EVENTS';
                 } else {
                     upcomingPanel.classList.remove('active');
                     floatBtn.classList.remove('back-btn');
@@ -772,7 +872,7 @@
                     floatBtnIcon.className = 'fas fa-chevron-right';
                     floatBtnIcon.style.fontSize = '0.7rem';
                     document.getElementById('currentEventPanel').style.display = 'block';
-                    document.querySelector('.tabs').style.display = 'flex';
+                    if (label) label.querySelector('span').textContent = 'ACARA BERLANGSUNG';
                 }
             };
 
@@ -888,7 +988,22 @@
                 const content = document.getElementById('adminContentArea');
                 let html = '';
                 switch (section) {
-                    case 'dashboard':
+                    case 'livetoggle':
+                        html = `
+                            <h4><i class="fas fa-broadcast-tower" style="color:#0077b6;"></i> Status LIVE</h4>
+                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:16px;">Aktifkan atau nonaktifkan tampilan LIVE. Jika <strong>OFF</strong>, viewer akan melihat <em>Coming Soon</em> beserta acara & seri berikutnya — tanpa Starting List.</p>
+                            <div style="display:flex; align-items:center; gap:16px; background:rgba(0,119,182,0.06); border-radius:1rem; padding:14px 18px; border:2px solid rgba(0,119,182,0.12); margin-bottom:14px;">
+                                <span style="font-size:2rem;">${isLive ? '🟢' : '🔴'}</span>
+                                <div>
+                                    <p style="font-weight:800; font-size:1.05rem; color:#023e8a;">${isLive ? 'LIVE — Acara Sedang Berlangsung' : 'OFF — Coming Soon Ditampilkan'}</p>
+                                    <p style="color:#4a6a7a; font-size:0.82rem; margin-top:2px;">Klik tombol di bawah untuk mengubah status</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleLive()" style="width:100%; background:${isLive ? '#e63946' : '#0a7c3e'};">
+                                ${isLive ? '<i class="fas fa-stop-circle"></i> Matikan LIVE (Coming Soon)' : '<i class="fas fa-play-circle"></i> Aktifkan LIVE'}
+                            </button>
+                        `;
+                        break;
                         const fbStatus = window._firebaseReady
                             ? '<span style="color:#0a7c3e;">✅ Terhubung — semua perubahan real-time ke pengunjung</span>'
                             : '<span style="color:#e63946;">⚠️ Belum terhubung — isi FIREBASE_CONFIG di index.html (lihat TUTORIAL_FIREBASE.md)</span>';
@@ -1030,6 +1145,13 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+            };
+
+            window.toggleLive = function() {
+                isLive = !isLive;
+                saveAll();
+                renderCurrentEvent();
+                renderAdminSection('livetoggle');
             };
 
             // ---------- EXPOSE FUNCTIONS ----------
