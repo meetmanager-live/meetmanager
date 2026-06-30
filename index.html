@@ -320,8 +320,7 @@
             .admin-grid { flex-direction: column; }
             .admin-sidebar { flex-direction: row; flex-wrap: wrap; }
             .menu-btn { flex: 1 1 auto; font-size: 0.78rem; padding: 0.55rem 0.8rem; }
-            .upcoming-float-btn { top: 14px; right: 12px; padding: 0.5rem 1rem; font-size: 0.78rem; }
-            .upcoming-float-btn .btn-text { display: none; }
+            .upcoming-float-btn { top: 14px; right: 12px; padding: 0.5rem 0.9rem; font-size: 0.7rem; gap: 5px; }
             .upcoming-float-btn .badge-count { display: none; }
             .admin-hamburger { top: 12px; left: 12px; width: 44px; height: 44px; }
             .logout-pill { top: 12px; left: 64px; height: 44px; font-size: 0.72rem; }
@@ -394,7 +393,7 @@
                 <div id="nextEventHint" class="next-event-hint" style="display:none;">
                     <i class="fas fa-forward"></i> <span id="nextEventHintText"></span>
                 </div>
-                <div class="event-desc" id="eventDesc"><i class="fas fa-flag-checkered"></i> Tambahkan data acara lewat menu Admin &gt; Upload CSV</div>
+                <div class="event-desc hidden" id="eventDesc"><i class="fas fa-flag-checkered"></i> Tambahkan data acara lewat menu Admin &gt; Upload CSV</div>
                 <div id="quickNavBar" class="admin-nav-controls hidden">
                     <button class="nav-btn" id="qNavPrevAcara" onclick="adminPrevAcara()"><i class="fas fa-step-backward"></i> Acara</button>
                     <button class="nav-btn" id="qNavPrevSeri" onclick="adminPrevSeri()"><i class="fas fa-chevron-left"></i> Seri</button>
