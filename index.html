@@ -738,7 +738,7 @@
                     const csSeri = document.getElementById('csSeriTitle');
                     const csEv   = document.getElementById('csEventTitle');
                     const csDate = document.getElementById('csDate');
-                    if (csSeri) csSeri.textContent = nextSeri ? `Pemanggilan ${nextSeri}` : '';
+                    if (csSeri) csSeri.textContent = nextSeri ? `Next ${nextSeri}` : '';
                     if (csEv)   csEv.textContent   = nextNama;
                     if (csDate) {
                         if (comingSoonDate) {
@@ -791,14 +791,14 @@
                     // Extract next acara number from same event name
                     const dashIdx = ev.nama.indexOf(' - ');
                     const acaraNum = dashIdx >= 0 ? ev.nama.substring(0, dashIdx).trim() : ev.nama;
-                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
+                    nextLabel = `Next ${nextSeri} — ACARA ${acaraNum}`;
                 } else if (currentEventIndex < events.length - 1) {
                     // next event, first seri
                     const nextEv = events[currentEventIndex + 1];
                     const nextSeri = nextEv.seri[0] || 'SERI 01';
                     const dashIdx = nextEv.nama.indexOf(' - ');
                     const acaraNum = dashIdx >= 0 ? nextEv.nama.substring(0, dashIdx).trim() : nextEv.nama;
-                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
+                    nextLabel = `Next ${nextSeri} — ACARA ${acaraNum}`;
                 }
                 if (nextHint && nextHintText) {
                     if (nextLabel) {
