@@ -155,10 +155,10 @@
 
         .header {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            gap: 2px;
             padding-top: 0.2rem;
         }
         .logo {
@@ -174,6 +174,7 @@
             gap: 8px;
         }
         .logo i { background: none; -webkit-text-fill-color: #00d4ff; font-size: 2rem; }
+        .logo-tagline { font-size: 0.7rem; font-weight: 700; letter-spacing: 3px; color: rgba(255,255,255,0.55); margin-top: 2px; text-align: center; }
         /* sembunyikan admin-btn lama dari HTML — diganti hamburger */
         .admin-btn { display: none !important; }
         .tabs {
@@ -231,7 +232,7 @@
         .scoreboard-table tbody tr:hover { background: rgba(255,255,255,0.08); }
         .scoreboard-table tbody tr:last-child { border-bottom: none; }
         .scoreboard-table tbody td { padding: 0.5rem 0.8rem; vertical-align: middle; }
-        .scoreboard-table .lane-cell { font-weight: 800; color: #00d4ff; font-size: 0.9rem; }
+        .scoreboard-table .lane-cell { font-weight: 800; color: #ffb627; font-size: 1rem; text-shadow: 0 0 8px rgba(255,182,39,0.4); }
         .scoreboard-table .name-cell { font-weight: 600; color: rgba(255,255,255,0.9); }
         .scoreboard-table .club-cell { color: rgba(255,255,255,0.6); }
         .scoreboard-table .empty-row td, .scoreboard-table .empty-row .lane-cell { color: rgba(255,255,255,0.3); font-style: italic; }
@@ -284,8 +285,8 @@
         .real-time-clock { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.10); padding: 0.3rem 1rem; border-radius: 2rem; font-weight: 600; color: rgba(255,255,255,0.85); font-size: 0.88rem; border: 1px solid rgba(255,255,255,0.18); }
         .real-time-clock i { color: #00d4ff; }
         /* Next event hint below seri */
-        .next-event-hint { margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,215,0,0.10); border: 1px solid rgba(255,215,0,0.28); padding: 0.28rem 1rem; border-radius: 2rem; font-size: 0.78rem; color: rgba(255,215,0,0.95); font-weight: 600; }
-        .next-event-hint i { color: #ffd700; font-size: 0.72rem; }
+        .next-event-hint { margin-top: 6px; display: inline-flex; align-items: center; gap: 7px; background: rgba(255,182,39,0.18); border: 1.5px solid rgba(255,182,39,0.5); padding: 0.38rem 1.2rem; border-radius: 2rem; font-size: 0.88rem; color: #ffd97a; font-weight: 700; box-shadow: 0 2px 10px rgba(255,182,39,0.15); }
+        .next-event-hint i { color: #ffb627; font-size: 0.85rem; }
         /* Coming Soon mode */
         .coming-soon-overlay { text-align: center; padding: 2.5rem 1.5rem; }
         .coming-soon-water-icon { font-size: 3rem; margin-bottom: 0.8rem; background: linear-gradient(135deg, #ffffff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -353,6 +354,7 @@
 
         <div class="header">
             <div class="logo"><i class="fas fa-water"></i> MEET.MANAGER</div>
+            <div class="logo-tagline">SEMI AUTOMATIC TIMING SYSTEM</div>
         </div>
 
         <!-- tombol admin lama disembunyikan via CSS, tapi tetap ada untuk JS -->
