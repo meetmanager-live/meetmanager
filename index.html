@@ -69,10 +69,8 @@
             left: 20px;
             width: 48px;
             height: 48px;
-            background: rgba(0,119,182,0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 2px solid rgba(255,255,255,0.5);
+            background: transparent;
+            border: none;
             border-radius: 14px;
             display: flex;
             flex-direction: column;
@@ -82,14 +80,14 @@
             cursor: pointer;
             z-index: 999;
             transition: 0.25s;
-            box-shadow: 0 4px 20px rgba(0,119,182,0.35);
+            box-shadow: none;
         }
-        .admin-hamburger:hover { background: rgba(2,62,138,0.92); transform: scale(1.07); }
+        .admin-hamburger:hover { background: rgba(255,255,255,0.06); transform: scale(1.07); }
         .admin-hamburger span {
             display: block;
             width: 20px;
             height: 2.5px;
-            background: white;
+            background: rgba(255,255,255,0.35);
             border-radius: 2px;
             transition: 0.25s;
         }
@@ -738,7 +736,7 @@
                     const csSeri = document.getElementById('csSeriTitle');
                     const csEv   = document.getElementById('csEventTitle');
                     const csDate = document.getElementById('csDate');
-                    if (csSeri) csSeri.textContent = nextSeri ? `Next ${nextSeri}` : '';
+                    if (csSeri) csSeri.textContent = nextSeri ? `Pemanggilan ${nextSeri}` : '';
                     if (csEv)   csEv.textContent   = nextNama;
                     if (csDate) {
                         if (comingSoonDate) {
@@ -791,14 +789,14 @@
                     // Extract next acara number from same event name
                     const dashIdx = ev.nama.indexOf(' - ');
                     const acaraNum = dashIdx >= 0 ? ev.nama.substring(0, dashIdx).trim() : ev.nama;
-                    nextLabel = `Next ${nextSeri} — ACARA ${acaraNum}`;
+                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
                 } else if (currentEventIndex < events.length - 1) {
                     // next event, first seri
                     const nextEv = events[currentEventIndex + 1];
                     const nextSeri = nextEv.seri[0] || 'SERI 01';
                     const dashIdx = nextEv.nama.indexOf(' - ');
                     const acaraNum = dashIdx >= 0 ? nextEv.nama.substring(0, dashIdx).trim() : nextEv.nama;
-                    nextLabel = `Next ${nextSeri} — ACARA ${acaraNum}`;
+                    nextLabel = `Pemanggilan ${nextSeri} — ACARA ${acaraNum}`;
                 }
                 if (nextHint && nextHintText) {
                     if (nextLabel) {
