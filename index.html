@@ -268,6 +268,10 @@
         .event-card h3 { font-size:1.5rem; font-weight:700; color:#ffd700; margin-bottom:4px; }
         .event-card .event-date { color:rgba(255,255,255,0.8); font-size:0.95rem; margin-bottom:4px; }
         .event-card .event-desc-upcoming { color:rgba(255,255,255,0.7); font-size:0.9rem; }
+        .upcoming-subtabs { display: flex; gap: 8px; background: rgba(0,119,182,0.10); padding: 5px; border-radius: 3rem; backdrop-filter: blur(8px); border: 1px solid rgba(0,119,182,0.15); margin-bottom: 1rem; }
+        .subtab-btn { flex: 1; text-align: center; padding: 0.65rem 1rem; border-radius: 3rem; font-weight: 700; cursor: pointer; background: transparent; color: rgba(255,255,255,0.75); font-size: 0.85rem; border: none; transition: 0.25s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .subtab-btn:hover { color: #ffffff; background: rgba(255,255,255,0.08); }
+        .subtab-btn.active { background: #0077b6; color: white; box-shadow: 0 6px 20px -6px rgba(0,119,182,0.4); }
         .admin-panel { background: rgba(255,255,255,0.80); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 2rem; padding: 1.8rem; border: 1.5px solid rgba(255,255,255,0.5); margin-top: 0.5rem; width: 100%; box-shadow: 0 8px 40px rgba(0,119,182,0.1); color: #1a2a3a; }
         .admin-grid { display: flex; flex-wrap: wrap; gap: 1.5rem; }
         .admin-sidebar { flex: 1 1 200px; display: flex; flex-direction: column; gap: 10px; }
@@ -342,6 +346,7 @@
             .admin-hamburger { top: 12px; left: 12px; width: 28px; height: 28px; }
             .logout-pill { top: 12px; left: 50px; height: 32px; font-size: 0.72rem; }
             .upcoming-item .btn-group { flex-direction: column; }
+            .subtab-btn { font-size: 0.75rem; padding: 0.55rem 0.6rem; }
         }
         @media (min-width: 601px) and (max-width: 1024px) {
             .upcoming-float-btn { top: 20px; right: 20px; }
@@ -363,7 +368,7 @@
 
     <button class="upcoming-float-btn" id="upcomingFloatBtn" onclick="toggleUpcoming()">
         <i class="fas fa-calendar-alt"></i>
-        <span class="btn-text" id="floatBtnText">Event Selanjutnya</span>
+        <span class="btn-text" id="floatBtnText">Event & Result</span>
         <span class="badge-count" id="upcomingBadge">0</span>
         <i class="fas fa-chevron-right" id="floatBtnIcon" style="font-size:0.7rem;"></i>
     </button>
@@ -435,7 +440,12 @@
         </div>
 
         <div class="upcoming-panel" id="upcomingPanel">
+            <div class="upcoming-subtabs" id="upcomingSubtabs">
+                <button class="subtab-btn active" data-subtab="next" onclick="switchUpcomingSubtab('next')"><i class="fas fa-calendar-alt"></i> Next Event</button>
+                <button class="subtab-btn" data-subtab="result" onclick="switchUpcomingSubtab('result')"><i class="fas fa-trophy"></i> Result</button>
+            </div>
             <div class="events-grid" id="upcomingEventsContainer"></div>
+            <div class="events-grid hidden" id="resultEventsContainer"></div>
         </div>
 
         <div id="adminPanelContainer" class="admin-panel hidden">
@@ -446,6 +456,7 @@
                     <button class="menu-btn" data-section="upload"><i class="fas fa-upload"></i> Upload CSV</button>
                     <button class="menu-btn" data-section="link"><i class="fas fa-link"></i> Link Hasil</button>
                     <button class="menu-btn" data-section="upcoming"><i class="fas fa-calendar-plus"></i> Event Selanjutnya</button>
+                    <button class="menu-btn" data-section="results"><i class="fas fa-trophy"></i> Hasil Lomba</button>
                     <button class="menu-btn" data-section="navigation"><i class="fas fa-arrows-alt-h"></i> Navigasi</button>
                     <button class="menu-btn" data-section="eventname"><i class="fas fa-tag"></i> Nama Event</button>
                     <button class="menu-btn" data-section="reset"><i class="fas fa-trash-alt"></i> Reset Data</button>
@@ -506,6 +517,7 @@
             let currentEventIndex = 0;
             let currentSeriIndex = 0;
             let upcomingEvents = [];
+            let resultEvents = [];
             let swimmersData = [];
             let globalDriveLink = '';
             let eventName = 'Nama Kejuaraan Anda';
@@ -643,6 +655,7 @@
                     currentEventIndex: currentEventIndex,
                     currentSeriIndex:  currentSeriIndex,
                     upcomingEvents:    upcomingEvents.length ? upcomingEvents : [],
+                    resultEvents:      resultEvents.length ? resultEvents : [],
                     isLive:            isLive,
                     comingSoonDate:    comingSoonDate
                 };
@@ -661,6 +674,7 @@
                     eventName       = data.eventName       || 'Nama Kejuaraan Anda';
                     globalDriveLink = data.globalDriveLink || '';
                     upcomingEvents  = data.upcomingEvents  || [];
+                    resultEvents    = data.resultEvents    || [];
                     isLive          = data.isLive !== undefined ? data.isLive : true;
                     comingSoonDate  = data.comingSoonDate  || '';
 
@@ -680,6 +694,10 @@
 
                     updateBadge();
                     renderCurrentEvent();
+                    if (isUpcomingVisible) {
+                        renderUpcomingViewer();
+                        renderResultsViewer();
+                    }
                     if (isAdmin) updateAdminNavControls();
                 });
             }
@@ -898,6 +916,7 @@
                 if (isUpcomingVisible) {
                     upcomingPanel.classList.add('active');
                     renderUpcomingViewer();
+                    renderResultsViewer();
                     floatBtn.classList.add('back-btn');
                     floatBtnText.textContent = 'Kembali';
                     floatBtnIcon.className = 'fas fa-arrow-left';
@@ -907,7 +926,7 @@
                 } else {
                     upcomingPanel.classList.remove('active');
                     floatBtn.classList.remove('back-btn');
-                    floatBtnText.textContent = 'Event Selanjutnya';
+                    floatBtnText.textContent = 'Event & Result';
                     floatBtnIcon.className = 'fas fa-chevron-right';
                     floatBtnIcon.style.fontSize = '0.7rem';
                     document.getElementById('currentEventPanel').style.display = 'block';
@@ -917,8 +936,30 @@
                 }
             };
 
+            // ---------- SUB-TAB: EVENT SELANJUTNYA vs HASIL LOMBA ----------
+            window.switchUpcomingSubtab = function(which) {
+                const nextBtn = document.querySelector('.subtab-btn[data-subtab="next"]');
+                const resultBtn = document.querySelector('.subtab-btn[data-subtab="result"]');
+                const nextContainer = document.getElementById('upcomingEventsContainer');
+                const resultContainer = document.getElementById('resultEventsContainer');
+                if (which === 'result') {
+                    if (resultBtn) resultBtn.classList.add('active');
+                    if (nextBtn) nextBtn.classList.remove('active');
+                    if (resultContainer) resultContainer.classList.remove('hidden');
+                    if (nextContainer) nextContainer.classList.add('hidden');
+                    renderResultsViewer();
+                } else {
+                    if (nextBtn) nextBtn.classList.add('active');
+                    if (resultBtn) resultBtn.classList.remove('active');
+                    if (nextContainer) nextContainer.classList.remove('hidden');
+                    if (resultContainer) resultContainer.classList.add('hidden');
+                    renderUpcomingViewer();
+                }
+            };
+
             function renderUpcomingViewer() {
                 const container = document.getElementById('upcomingEventsContainer');
+                if (!container) return;
                 if (!upcomingEvents.length) {
                     container.innerHTML = `
                         <div style="text-align:center; padding:2rem; color:#4a6a7a; background:rgba(0,119,182,0.04); border-radius:1.5rem; border:2px dashed rgba(0,119,182,0.15);">
@@ -937,6 +978,34 @@
                             ${ev.linkInfo ? `
                             <button onclick="window.open('${ev.linkInfo}','_blank')" style="margin-top:10px; background:rgba(255,255,255,0.18); border:1.5px solid rgba(255,255,255,0.5); color:white; font-size:0.82rem; padding:0.45rem 1.2rem; border-radius:2rem; backdrop-filter:blur(4px); display:inline-flex; align-items:center; gap:6px;">
                                 <i class="fas fa-file-alt"></i> Informasi Lomba
+                            </button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // ---------- RENDER HASIL LOMBA (semua event yang pernah ada) ----------
+            function renderResultsViewer() {
+                const container = document.getElementById('resultEventsContainer');
+                if (!container) return;
+                if (!resultEvents.length) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:2rem; color:#4a6a7a; background:rgba(0,119,182,0.04); border-radius:1.5rem; border:2px dashed rgba(0,119,182,0.15);">
+                            <i class="fas fa-trophy" style="font-size:2rem; color:#0077b6; opacity:0.5;"></i>
+                            <p style="margin-top:8px;">Belum ada hasil lomba yang ditambahkan</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = resultEvents.map(ev => `
+                    <div class="event-card" style="background-image: url('${ev.bg || 'img/bg.jpg'}');">
+                        <div class="event-card-content">
+                            <h3>${ev.nama}</h3>
+                            <p class="event-date"><i class="far fa-calendar-alt"></i> ${ev.tanggal}</p>
+                            <p class="event-desc-upcoming">${ev.deskripsi || ''}</p>
+                            ${ev.linkInfo ? `
+                            <button onclick="window.open('${ev.linkInfo}','_blank')" style="margin-top:10px; background:rgba(255,255,255,0.18); border:1.5px solid rgba(255,255,255,0.5); color:white; font-size:0.82rem; padding:0.45rem 1.2rem; border-radius:2rem; backdrop-filter:blur(4px); display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-file-pdf"></i> Lihat Hasil
                             </button>` : ''}
                         </div>
                     </div>
@@ -963,6 +1032,32 @@
                         <input value="${ev.linkInfo || ''}" placeholder="Link Informasi Lomba (opsional)" onchange="updateUpcoming(${idx},'linkInfo',this.value)">
                         <div class="btn-group">
                             <button onclick="deleteUpcoming(${idx})" class="danger">Hapus</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // ---------- ADMIN FORM: HASIL LOMBA ----------
+            function renderResultsAdminForm() {
+                const container = document.getElementById('resultsAdminFormContainer');
+                if (!container) return;
+                if (!resultEvents.length) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:1rem; color:#4a6a7a; background:rgba(0,119,182,0.04); border-radius:1rem; border:2px dashed rgba(0,119,182,0.15); margin-bottom:12px;">
+                            <p>Belum ada hasil lomba yang ditambahkan</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = resultEvents.map((ev, idx) => `
+                    <div class="upcoming-item">
+                        <input value="${ev.nama}" placeholder="Nama Event" onchange="updateResult(${idx},'nama',this.value)">
+                        <input value="${ev.tanggal}" placeholder="Tanggal (contoh: 15-17 Agustus 2025)" onchange="updateResult(${idx},'tanggal',this.value)">
+                        <input value="${ev.deskripsi}" placeholder="Deskripsi" onchange="updateResult(${idx},'deskripsi',this.value)">
+                        <input value="${ev.bg}" placeholder="URL Background" onchange="updateResult(${idx},'bg',this.value)">
+                        <input value="${ev.linkInfo || ''}" placeholder="Link Hasil Lomba" onchange="updateResult(${idx},'linkInfo',this.value)">
+                        <div class="btn-group">
+                            <button onclick="deleteResult(${idx})" class="danger">Hapus</button>
                         </div>
                     </div>
                 `).join('');
@@ -1115,6 +1210,15 @@
                         `;
                         setTimeout(renderUpcomingAdminForm, 20);
                         break;
+                    case 'results':
+                        html = `
+                            <h4><i class="fas fa-trophy" style="color:#0077b6;"></i> Kelola Hasil Lomba</h4>
+                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:12px;">Tambahkan link hasil untuk event-event yang sudah pernah berlangsung. Semua entri di sini akan muncul di tab "Hasil Lomba" pada panel Event & Result yang dilihat pengunjung.</p>
+                            <div id="resultsAdminFormContainer"></div>
+                            <button onclick="addNewResult()" style="width:100%;">+ Tambah Hasil Event</button>
+                        `;
+                        setTimeout(renderResultsAdminForm, 20);
+                        break;
                     case 'navigation':
                         html = `
                             <h4><i class="fas fa-arrows-alt-h" style="color:#0077b6;"></i> Kontrol Navigasi</h4>
@@ -1153,6 +1257,7 @@
             window.resetAllData = function() {
                 if (confirm('Yakin ingin mereset semua pengaturan? (Data acara dari data.csv tidak terpengaruh)')) {
                     upcomingEvents  = [];
+                    resultEvents    = [];
                     globalDriveLink = '';
                     eventName       = 'Nama Kejuaraan Anda';
                     currentEventIndex = 0;
@@ -1236,6 +1341,34 @@
                 if (isUpcomingVisible) renderUpcomingViewer();
                 renderUpcomingAdminForm();
             };
+
+            // ---------- EXPOSE FUNCTIONS: HASIL LOMBA ----------
+            window.updateResult = (idx, field, value) => {
+                resultEvents[idx][field] = value;
+                saveAll();
+                if (isUpcomingVisible) renderResultsViewer();
+                renderResultsAdminForm();
+            };
+            window.deleteResult = (idx) => {
+                resultEvents.splice(idx, 1);
+                saveAll();
+                if (isUpcomingVisible) renderResultsViewer();
+                renderResultsAdminForm();
+            };
+            window.addNewResult = () => {
+                resultEvents.push({
+                    id: Date.now(),
+                    nama: 'Nama Kejuaraan',
+                    tanggal: '',
+                    deskripsi: '',
+                    bg: 'img/bg.jpg',
+                    linkInfo: ''
+                });
+                saveAll();
+                if (isUpcomingVisible) renderResultsViewer();
+                renderResultsAdminForm();
+            };
+
             window.updateLink = () => {
                 const v = document.getElementById('linkInput').value.trim();
                 if (v) { globalDriveLink = v; saveAll(); alert('Link berhasil disimpan!'); }
