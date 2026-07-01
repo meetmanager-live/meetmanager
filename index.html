@@ -157,6 +157,21 @@
             gap: 2px;
             padding-top: 0.2rem;
         }
+        .brand-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand-icon {
+            color: #00d4ff;
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .brand-text-col {
+            display: flex;
+            flex-direction: column;
+        }
         .logo {
             font-weight: 800;
             font-size: 1.9rem;
@@ -165,12 +180,20 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: block;
+            white-space: nowrap;
         }
-        .logo i { background: none; -webkit-text-fill-color: #00d4ff; font-size: 2rem; }
-        .logo-tagline { font-size: 0.7rem; font-weight: 700; letter-spacing: 3px; color: rgba(255,255,255,0.55); margin-top: 2px; text-align: center; }
+        .logo-tagline {
+            display: block;
+            width: 100%;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.55);
+            margin-top: 2px;
+            text-align: left;
+            white-space: nowrap;
+            letter-spacing: 2px;
+        }
         /* sembunyikan admin-btn lama dari HTML — diganti hamburger */
         .admin-btn { display: none !important; }
         .tabs {
@@ -296,7 +319,6 @@
             .app-container { padding: 1rem 1rem 1.5rem; border-radius: 1.6rem; gap: 1rem; }
             .header { justify-content: center; }
             .logo { font-size: 1.5rem; }
-            .logo i { font-size: 1.6rem; }
             .tabs { max-width: 100%; }
             .tab { padding: 0.6rem 1rem; font-size: 0.8rem; }
             .card-view { padding: 1.1rem; border-radius: 1.4rem; }
@@ -349,8 +371,13 @@
     <div class="app-container" id="appContainer">
 
         <div class="header">
-            <div class="logo"><i class="fas fa-water"></i> MEET.MANAGER</div>
-            <div class="logo-tagline">SEMI AUTOMATIC TIMING SYSTEM</div>
+            <div class="brand-wrap">
+                <i class="fas fa-water brand-icon"></i>
+                <div class="brand-text-col">
+                    <div class="logo"><span class="logo-text">MEET.MANAGER</span></div>
+                    <div class="logo-tagline">SEMI AUTOMATIC TIMING SYSTEM</div>
+                </div>
+            </div>
         </div>
 
         <!-- tombol admin lama disembunyikan via CSS, tapi tetap ada untuk JS -->
@@ -728,14 +755,12 @@
                     const acaraLabel = document.getElementById('acaraLabel');
                     if (acaraLabel) acaraLabel.style.display = 'none';
                     eventNameText.innerText = eventName || 'Kejuaraan Renang';
-                    const nextE = events[currentEventIndex];
-                    const nextSeri = nextE ? (nextE.seri[currentSeriIndex] || 'SERI 01') : '';
-                    const nextNama = nextE ? nextE.nama : '';
+                    // Acara & seri BENAR-BENAR disembunyikan saat OFF — tidak ada cuplikan "next"
                     const csSeri = document.getElementById('csSeriTitle');
                     const csEv   = document.getElementById('csEventTitle');
                     const csDate = document.getElementById('csDate');
-                    if (csSeri) csSeri.textContent = nextSeri ? `Next ${nextSeri}` : '';
-                    if (csEv)   csEv.textContent   = nextNama;
+                    if (csSeri) { csSeri.textContent = ''; csSeri.style.display = 'none'; }
+                    if (csEv)   { csEv.textContent   = ''; csEv.style.display = 'none'; }
                     if (csDate) {
                         if (comingSoonDate) {
                             csDate.innerHTML = `<i class="far fa-calendar-alt"></i> ${comingSoonDate}`;
@@ -1007,7 +1032,7 @@
                     case 'livetoggle':
                         html = `
                             <h4><i class="fas fa-broadcast-tower" style="color:#0077b6;"></i> Status LIVE</h4>
-                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:16px;">Aktifkan atau nonaktifkan tampilan LIVE. Jika <strong>OFF</strong>, viewer akan melihat <em>Coming Soon</em> beserta acara & seri berikutnya.</p>
+                            <p style="color:#4a6a7a; font-size:0.9rem; margin-bottom:16px;">Aktifkan atau nonaktifkan tampilan LIVE. Jika <strong>OFF</strong>, viewer hanya akan melihat <em>Coming Soon</em> — nama acara & seri disembunyikan sepenuhnya.</p>
                             <div style="display:flex; align-items:center; gap:16px; background:rgba(0,119,182,0.06); border-radius:1rem; padding:14px 18px; border:2px solid rgba(0,119,182,0.12); margin-bottom:14px;">
                                 <span style="font-size:2rem;">${isLive ? '🟢' : '🔴'}</span>
                                 <div>
@@ -1312,6 +1337,45 @@
                 }
                 tryAttach(20);
             });
+        })();
+
+        // Samakan lebar & posisi tagline dengan teks "MEET.MANAGER" (tanpa ikon)
+        // + besarkan ikon supaya tingginya pas dari atas logo sampai bawah tagline
+        (function alignBrandTagline() {
+            function fit() {
+                const brandTextCol = document.querySelector('.brand-text-col');
+                const brandIcon = document.querySelector('.brand-icon');
+                const logoText = document.querySelector('.logo-text');
+                const tagline = document.querySelector('.logo-tagline');
+                if (!brandTextCol || !brandIcon || !logoText || !tagline) return;
+
+                tagline.style.marginLeft = '0px';
+                tagline.style.letterSpacing = '0px';
+
+                const colRect = brandTextCol.getBoundingClientRect();
+                const textRect = logoText.getBoundingClientRect();
+                const offsetLeft = textRect.left - colRect.left;
+                const targetWidth = textRect.width;
+                const naturalWidth = tagline.getBoundingClientRect().width;
+                const charGaps = tagline.textContent.trim().length - 1;
+
+                tagline.style.marginLeft = offsetLeft + 'px';
+
+                if (charGaps > 0) {
+                    let extraPerChar = (targetWidth - naturalWidth) / charGaps;
+                    extraPerChar = Math.max(0, Math.min(extraPerChar, 4)); // batasi biar tidak kejauhan
+                    tagline.style.letterSpacing = extraPerChar.toFixed(2) + 'px';
+                }
+
+                // Besarkan ikon sesuai tinggi total kolom teks (logo + tagline)
+                const totalHeight = brandTextCol.getBoundingClientRect().height;
+                brandIcon.style.fontSize = (totalHeight * 0.92) + 'px';
+            }
+            window.addEventListener('load', fit);
+            window.addEventListener('resize', fit);
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(fit);
+            }
         })();
     </script>
 </body>
