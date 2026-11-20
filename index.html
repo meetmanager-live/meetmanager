@@ -737,7 +737,7 @@
                     const m = Math.max(...s.swimmers.map(sw => sw.lane), 0);
                     return Math.max(max, m);
                 }, 0);
-                const maxLane = Math.min(Math.max(globalMaxLane, sorted.length > 0 ? Math.max(...sorted.map(s=>s.lane)) : 0), 15);
+                const maxLane = Math.min(Math.max(globalMaxLane, sorted.length > 0 ? Math.max(...sorted.map(s=>s.lane)) : 0), 18);
 
                 let html = `
                     <table class="scoreboard-table">
