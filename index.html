@@ -431,12 +431,13 @@
                 </div>
             </div>
 
+            <button id="globalInfoBtn" class="global-link-btn"><i class="fas fa-file-pdf"></i> 📄 INFORMASI HASIL LOMBA</button>
+
             <div class="swimmers-section" id="swimmersSection">
                 <h4><i class="fas fa-table"></i> STARTING LIST</h4>
                 <div id="swimmersContainer"><div class="no-swimmers">Belum ada data perenang untuk acara ini</div></div>
             </div>
 
-            <button id="globalInfoBtn" class="global-link-btn"><i class="fas fa-file-pdf"></i> 📄 INFORMASI HASIL LOMBA</button>
             </div><!-- end liveContent -->
         </div>
 
@@ -455,6 +456,7 @@
                     <button class="menu-btn active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
                     <button class="menu-btn" data-section="livetoggle"><i class="fas fa-broadcast-tower"></i> Live / Off</button>
                     <button class="menu-btn" data-section="upload"><i class="fas fa-upload"></i> Upload CSV</button>
+                    <button class="menu-btn" data-section="console"><i class="fas fa-network-wired"></i> Koneksi Console</button>
                     <button class="menu-btn" data-section="link"><i class="fas fa-link"></i> Link Hasil</button>
                     <button class="menu-btn" data-section="upcoming"><i class="fas fa-calendar-plus"></i> Event Selanjutnya</button>
                     <button class="menu-btn" data-section="results"><i class="fas fa-trophy"></i> Hasil Lomba</button>
@@ -483,7 +485,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-        import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+        import { getDatabase, ref, set, onValue, get, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
         // ============================================================
         // 🔧 KONFIGURASI FIREBASE — ganti dengan config milikmu
@@ -508,6 +510,7 @@
         window._firebaseRef    = (path) => ref(db, path);
         window._firebaseOnValue = onValue;
         window._firebaseGet    = get;
+        window._firebaseOnDisconnect = onDisconnect;
         window._firebaseReady  = true;
     </script>
 
@@ -526,6 +529,7 @@
             let isUpcomingVisible = false;
             let isLive = true;
             let comingSoonDate = '';
+            let liveFeed = null;   // starting list langsung dari console (via Firebase meet/live)
             const ADMIN_PASSWORD = 'best22';
             let _fbListenerAttached = false;
 
@@ -701,6 +705,13 @@
                     }
                     if (isAdmin) updateAdminNavControls();
                 });
+
+                // Starting list langsung dari Meet Manager Console (diteruskan browser admin)
+                window._firebaseOnValue(window._firebaseRef('meet/live'), (snapshot) => {
+                    liveFeed = snapshot.val();
+                    renderCurrentEvent();
+                    updateConsoleStatusUI();
+                });
             }
 
             function loadFromStorage() {
@@ -802,6 +813,10 @@
                 // Tampilkan kembali label
                 const acaraLabelEl = document.getElementById('acaraLabel');
                 if (acaraLabelEl) acaraLabelEl.style.display = '';
+
+                // Jika console terhubung, starting list mengikuti console (tanpa geser acara/seri manual)
+                if (isConsoleFeedActive()) { renderConsoleFeed(); return; }
+                seriDisplay.style.display = '';
 
                 if (!events.length) {
                     eventDisplay.innerText = 'Tidak ada acara';
@@ -1195,6 +1210,21 @@
                             <button onclick="reloadDataCSV()" style="width:100%;"><i class="fas fa-sync-alt"></i> Muat Ulang data.csv Sekarang</button>
                         `;
                         break;
+                    case 'console':
+                        html = `
+                            <h4><i class="fas fa-network-wired" style="color:#0077b6;"></i> Koneksi Meet Manager Console</h4>
+                            <div style="background:rgba(0,119,182,0.06); border-radius:1rem; padding:1rem; margin-bottom:14px; font-size:0.88rem; color:#1a3a4a; border-left:4px solid #0077b6;">
+                                Masukkan IP console (perangkat ini harus satu jaringan dengan console). Starting list <strong>Lane, Name, Team</strong> akan mengikuti console otomatis, tanpa geser acara/seri manual, dan dilihat semua pengunjung.<br><br>
+                                IP hanya tersimpan di browser ini, tidak tampil di halaman publik dan tidak dikirim ke Firebase. Biarkan halaman ini tetap terbuka selama lomba.
+                            </div>
+                            <input id="consoleIpInput" value="${esc(lsGet(CONSOLE_IP_KEY))}" placeholder="IP console, contoh: 192.168.1.50" inputmode="decimal" autocomplete="off">
+                            <button onclick="saveConsoleIP()" style="width:100%;margin-top:8px;"><i class="fas fa-plug"></i> Simpan &amp; Hubungkan</button>
+                            <button class="secondary" onclick="disconnectConsole()" style="width:100%;margin-top:8px;"><i class="fas fa-unlink"></i> Putuskan (kembali ke data.csv)</button>
+                            <button class="danger" onclick="clearConsoleIP()" style="width:100%;margin-top:8px;"><i class="fas fa-trash-alt"></i> Hapus IP</button>
+                            <div id="consoleStatus" style="margin-top:14px;padding:10px 14px;border-radius:1rem;background:rgba(0,119,182,0.06);font-size:0.9rem;"></div>
+                        `;
+                        setTimeout(updateConsoleStatusUI, 20);
+                        break;
                     case 'link':
                         html = `
                             <h4><i class="fas fa-link" style="color:#0077b6;"></i> Link Hasil Lomba</h4>
@@ -1385,6 +1415,203 @@
                 }
             };
 
+            // ---------- STARTING LIST LANGSUNG DARI CONSOLE ----------
+            // Alur: browser admin --WebSocket (LAN)--> Meet Manager Console (ws://IP:81)
+            //       browser admin --Firebase meet/live--> semua pengunjung.
+            // IP hanya disimpan di localStorage browser admin; tidak ditulis ke Firebase / halaman publik.
+            const CONSOLE_WS_PORT = 81;
+            const CONSOLE_IP_KEY  = 'mm_console_ip';
+            const CONSOLE_AUTO_KEY = 'mm_console_auto';
+            let consoleWS = null, consoleState = 'off', consoleError = '';
+            let consoleWant = false, consoleRetryDelay = 2000, consoleRetryTimer = null;
+            let consoleDropTimer = null, consoleKeepAlive = null;
+            let consoleLastSig = '', consoleLastSeq = -1, consoleLastUpdate = 0;
+
+            function esc(v) {
+                return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            }
+            function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+            function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+            function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+            // Terima "192.168.1.50", "http://192.168.1.50/", "192.168.1.50:80" -> "192.168.1.50"
+            function cleanConsoleHost(v) {
+                v = String(v || '').trim().replace(/^[a-z]+:\/\//i, '').replace(/[\/?#].*$/, '').replace(/:\d+$/, '');
+                if (/^\d{1,3}(\.\d{1,3}){3}$/.test(v)) return v.split('.').every(n => +n <= 255) ? v : '';
+                return /^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$/.test(v) ? v : '';
+            }
+
+            // players[] dari console -> baris starting list (hanya lane tampil, trailing kosong dibuang)
+            function buildConsoleFeed(d) {
+                const rows = [];
+                (Array.isArray(d.players) ? d.players : []).forEach((p, i) => {
+                    if (!p || p.hidden) return;
+                    const name = String(p.name || '').trim();
+                    const team = String(p.team || '').trim();
+                    rows.push({
+                        lane: p.laneNumber || (i + 1),
+                        name: (!name || name === '--:--') ? '' : name,
+                        team: (!team || team === '--:--' || team === '---') ? '' : team
+                    });
+                });
+                rows.sort((a, b) => a.lane - b.lane);
+                while (rows.length && !rows[rows.length - 1].name) rows.pop();
+                return { active: true, title: String(d.raceTitle || ''), subTitle: String(d.subTitle || ''), rows: rows, updatedAt: Date.now() };
+            }
+
+            function isConsoleFeedActive() { return !!(liveFeed && liveFeed.active === true); }
+
+            function renderConsoleFeed() {
+                eventDisplay.innerText = liveFeed.title || 'Acara Berlangsung';
+                seriDisplay.innerText = liveFeed.subTitle || '';
+                seriDisplay.style.display = liveFeed.subTitle ? '' : 'none';
+                seriCounter.innerText = '';
+                eventDesc.innerHTML = '';
+                eventTimeDisplay.innerText = 'Sedang Berlangsung';
+                const nextHint = document.getElementById('nextEventHint');
+                if (nextHint) nextHint.style.display = 'none';
+
+                const rows = Array.isArray(liveFeed.rows) ? liveFeed.rows : [];
+                if (!rows.some(r => r && r.name)) {
+                    swimmersContainer.innerHTML = '<div class="no-swimmers">Belum ada data perenang untuk acara ini</div>';
+                } else {
+                    let html = '<table class="scoreboard-table"><thead><tr><th>LANE</th><th>NAME</th><th>TEAM</th></tr></thead><tbody>';
+                    rows.forEach(r => {
+                        if (!r) return;
+                        html += r.name
+                            ? `<tr><td class="lane-cell">${esc(r.lane)}</td><td class="name-cell">${esc(r.name)}</td><td class="club-cell">${esc(r.team) || '-'}</td></tr>`
+                            : `<tr class="empty-row"><td class="lane-cell">${esc(r.lane)}</td><td>-</td><td>-</td></tr>`;
+                    });
+                    swimmersContainer.innerHTML = html + '</tbody></table>';
+                }
+                updateAdminNavControls();
+            }
+
+            function publishConsoleFeed(feed) {
+                liveFeed = feed;
+                renderCurrentEvent();
+                if (window._firebaseReady) {
+                    const r = window._firebaseRef('meet/live');
+                    window._firebaseSet(r, feed);
+                    // Tab admin ditutup / koneksi putus -> pengunjung otomatis kembali ke data.csv
+                    try { window._firebaseOnDisconnect(r).set({ active: false, updatedAt: Date.now() }); } catch (e) {}
+                }
+                updateConsoleStatusUI();
+            }
+
+            function publishConsoleOff() {
+                liveFeed = { active: false, updatedAt: Date.now() };
+                renderCurrentEvent();
+                if (window._firebaseReady) window._firebaseSet(window._firebaseRef('meet/live'), liveFeed);
+                consoleLastSig = '';
+            }
+
+            function setConsoleState(st, err) {
+                consoleState = st;
+                consoleError = err || '';
+                updateConsoleStatusUI();
+            }
+
+            function connectConsole() {
+                const host = lsGet(CONSOLE_IP_KEY);
+                if (!host) return;
+                clearTimeout(consoleRetryTimer);
+                if (consoleWS) { try { consoleWS.onclose = null; consoleWS.close(); } catch (e) {} consoleWS = null; }
+                consoleWant = true;
+                setConsoleState('connecting');
+
+                let ws;
+                try {
+                    ws = new WebSocket('ws://' + host + ':' + CONSOLE_WS_PORT);
+                } catch (e) {
+                    // Halaman HTTPS memblokir ws:// (mixed content) -> jangan retry terus-menerus
+                    consoleWant = false;
+                    setConsoleState('error', location.protocol === 'https:' ? 'mixed' : 'fail');
+                    return;
+                }
+                consoleWS = ws;
+
+                ws.onopen = () => {
+                    consoleRetryDelay = 2000;
+                    consoleLastSeq = -1;
+                    clearTimeout(consoleDropTimer); consoleDropTimer = null;
+                    setConsoleState('connected');
+                    ws.send('requestUpdate');
+                    clearInterval(consoleKeepAlive);
+                    consoleKeepAlive = setInterval(() => { if (ws.readyState === 1) ws.send('requestUpdate'); }, 5000);
+                };
+                ws.onmessage = (e) => {
+                    let d; try { d = JSON.parse(e.data); } catch (x) { return; }
+                    if (!d || d.type !== 'timerUpdate') return;
+                    if (typeof d.seq !== 'undefined') { if (d.seq < consoleLastSeq) return; consoleLastSeq = d.seq; }
+                    const feed = buildConsoleFeed(d);
+                    const sig = JSON.stringify([feed.title, feed.subTitle, feed.rows]);
+                    if (sig === consoleLastSig && isConsoleFeedActive()) return;   // timer berjalan tidak perlu ditulis ke Firebase
+                    consoleLastSig = sig;
+                    consoleLastUpdate = Date.now();
+                    publishConsoleFeed(feed);
+                };
+                ws.onclose = () => {
+                    clearInterval(consoleKeepAlive);
+                    if (!consoleWant) return;
+                    setConsoleState('connecting');
+                    // Putus > 15 dtk -> pengunjung kembali ke data.csv supaya tidak melihat data basi
+                    if (!consoleDropTimer) consoleDropTimer = setTimeout(() => { consoleDropTimer = null; if (consoleWant && consoleState !== 'connected') publishConsoleOff(); }, 15000);
+                    consoleRetryTimer = setTimeout(connectConsole, consoleRetryDelay);
+                    consoleRetryDelay = Math.min(Math.round(consoleRetryDelay * 1.5), 10000);
+                };
+            }
+
+            function disconnectConsole() {
+                consoleWant = false;
+                lsDel(CONSOLE_AUTO_KEY);
+                clearTimeout(consoleRetryTimer); clearTimeout(consoleDropTimer); clearInterval(consoleKeepAlive);
+                consoleDropTimer = null;
+                if (consoleWS) { try { consoleWS.onclose = null; consoleWS.close(); } catch (e) {} consoleWS = null; }
+                setConsoleState('off');
+                publishConsoleOff();
+            }
+
+            function resumeConsoleIfSaved() {
+                if (lsGet(CONSOLE_IP_KEY) && lsGet(CONSOLE_AUTO_KEY) === '1' && !consoleWS) connectConsole();
+            }
+
+            function updateConsoleStatusUI() {
+                const el = document.getElementById('consoleStatus');
+                if (!el) return;
+                let line;
+                if (consoleState === 'connected') line = '<span style="color:#0a7c3e;">🟢 Terhubung ke console</span>';
+                else if (consoleState === 'connecting') line = '<span style="color:#b36b00;">🟡 Menghubungkan…</span>';
+                else if (consoleState === 'error' && consoleError === 'mixed')
+                    line = '<span style="color:#e63946;">🔴 Diblokir browser: halaman ini dibuka lewat HTTPS sedangkan console memakai HTTP. Buka halaman lewat <code>http://</code>, atau izinkan "Insecure content" untuk situs ini di pengaturan browser.</span>';
+                else if (consoleState === 'error') line = '<span style="color:#e63946;">🔴 Gagal membuka koneksi. Periksa alamat IP.</span>';
+                else line = '<span style="color:#4a6a7a;">⚪ Tidak terhubung — starting list memakai data.csv</span>';
+
+                if (consoleState === 'connected' && isConsoleFeedActive()) {
+                    const n = (liveFeed.rows || []).filter(r => r && r.name).length;
+                    const t = consoleLastUpdate ? new Date(consoleLastUpdate).toTimeString().slice(0, 8) : '-';
+                    line += `<div style="margin-top:6px;font-size:0.85rem;color:#1a3a4a;">${esc(liveFeed.title) || '-'}${liveFeed.subTitle ? ' — ' + esc(liveFeed.subTitle) : ''}<br>${n} perenang · data berubah terakhir ${t}</div>`;
+                }
+                el.innerHTML = line;
+            }
+
+            window.saveConsoleIP = function() {
+                const input = document.getElementById('consoleIpInput');
+                const host = cleanConsoleHost(input ? input.value : '');
+                if (!host) { alert('Alamat IP tidak valid. Contoh: 192.168.1.50'); return; }
+                lsSet(CONSOLE_IP_KEY, host);
+                lsSet(CONSOLE_AUTO_KEY, '1');
+                if (input) input.value = host;
+                connectConsole();
+            };
+            window.disconnectConsole = disconnectConsole;
+            window.clearConsoleIP = function() {
+                disconnectConsole();
+                lsDel(CONSOLE_IP_KEY);
+                const input = document.getElementById('consoleIpInput');
+                if (input) input.value = '';
+            };
+
             // ---------- LOGIN ----------
             function login() {
                 const input = document.getElementById('passwordInput');
@@ -1401,6 +1628,7 @@
                     updateQuickNavBar();
                     error.innerText = '';
                     input.value = '';
+                    resumeConsoleIfSaved();
                     // Hamburger aktif
                     document.getElementById('adminHamburger').classList.add('active');
                     document.getElementById('logoutAdminBtn').classList.remove('hidden');
