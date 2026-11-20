@@ -662,7 +662,8 @@
                     upcomingEvents:    upcomingEvents.length ? upcomingEvents : [],
                     resultEvents:      resultEvents.length ? resultEvents : [],
                     isLive:            isLive,
-                    comingSoonDate:    comingSoonDate
+                    comingSoonDate:    comingSoonDate,
+                    live:              liveFeed || null   // jaga data console agar tidak terhapus saat admin menyimpan
                 };
                 fbSet('meet/state', payload);
                 updateBadge();
@@ -682,6 +683,7 @@
                     resultEvents    = data.resultEvents    || [];
                     isLive          = data.isLive !== undefined ? data.isLive : true;
                     comingSoonDate  = data.comingSoonDate  || '';
+                    liveFeed        = data.live || null;   // starting list dari console
 
                     // Update posisi hanya jika beda (hindari re-render tidak perlu)
                     const newEI = data.currentEventIndex ?? 0;
@@ -706,12 +708,6 @@
                     if (isAdmin) updateAdminNavControls();
                 });
 
-                // Starting list langsung dari Meet Manager Console (diteruskan browser admin)
-                window._firebaseOnValue(window._firebaseRef('meet/live'), (snapshot) => {
-                    liveFeed = snapshot.val();
-                    renderCurrentEvent();
-                    updateConsoleStatusUI();
-                });
             }
 
             function loadFromStorage() {
@@ -1426,6 +1422,7 @@
             let consoleWant = false, consoleRetryDelay = 2000, consoleRetryTimer = null;
             let consoleDropTimer = null, consoleKeepAlive = null;
             let consoleLastSig = '', consoleLastSeq = -1, consoleLastUpdate = 0;
+            let cloudState = 'idle', cloudErr = '', cloudAt = 0;   // status kiriman ke Firebase (untuk pengunjung)
 
             function esc(v) {
                 return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1491,10 +1488,15 @@
                 liveFeed = feed;
                 renderCurrentEvent();
                 if (window._firebaseReady) {
-                    const r = window._firebaseRef('meet/live');
-                    window._firebaseSet(r, feed);
+                    const r = window._firebaseRef('meet/state/live');
+                    cloudState = 'sending';
+                    Promise.resolve(window._firebaseSet(r, feed))
+                        .then(() => { cloudState = 'ok'; cloudAt = Date.now(); cloudErr = ''; updateConsoleStatusUI(); })
+                        .catch(err => { cloudState = 'error'; cloudErr = (err && (err.code || err.message)) || 'unknown'; console.warn('Gagal kirim meet/state/live:', err); updateConsoleStatusUI(); });
                     // Tab admin ditutup / koneksi putus -> pengunjung otomatis kembali ke data.csv
-                    try { window._firebaseOnDisconnect(r).set({ active: false, updatedAt: Date.now() }); } catch (e) {}
+                    try { window._firebaseOnDisconnect(r).set({ active: false, updatedAt: Date.now() }).catch(() => {}); } catch (e) {}
+                } else {
+                    cloudState = 'error'; cloudErr = 'Firebase belum siap';
                 }
                 updateConsoleStatusUI();
             }
@@ -1502,7 +1504,7 @@
             function publishConsoleOff() {
                 liveFeed = { active: false, updatedAt: Date.now() };
                 renderCurrentEvent();
-                if (window._firebaseReady) window._firebaseSet(window._firebaseRef('meet/live'), liveFeed);
+                if (window._firebaseReady) window._firebaseSet(window._firebaseRef('meet/state/live'), liveFeed);
                 consoleLastSig = '';
             }
 
@@ -1591,6 +1593,11 @@
                     const n = (liveFeed.rows || []).filter(r => r && r.name).length;
                     const t = consoleLastUpdate ? new Date(consoleLastUpdate).toTimeString().slice(0, 8) : '-';
                     line += `<div style="margin-top:6px;font-size:0.85rem;color:#1a3a4a;">${esc(liveFeed.title) || '-'}${liveFeed.subTitle ? ' — ' + esc(liveFeed.subTitle) : ''}<br>${n} perenang · data berubah terakhir ${t}</div>`;
+                }
+                if (consoleState === 'connected') {
+                    if (cloudState === 'ok') line += `<div style="margin-top:8px;color:#0a7c3e;">☁️ Terkirim ke pengunjung (${new Date(cloudAt).toTimeString().slice(0, 8)})</div>`;
+                    else if (cloudState === 'sending') line += '<div style="margin-top:8px;color:#b36b00;">☁️ Mengirim ke pengunjung…</div>';
+                    else if (cloudState === 'error') line += `<div style="margin-top:8px;color:#e63946;">☁️ GAGAL dikirim ke pengunjung: <strong>${esc(cloudErr)}</strong><br>Jika PERMISSION_DENIED: periksa Firebase → Realtime Database → Rules (harus mengizinkan tulis ke <code>meet/state</code>).</div>`;
                 }
                 el.innerHTML = line;
             }
